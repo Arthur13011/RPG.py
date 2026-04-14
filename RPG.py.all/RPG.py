@@ -410,7 +410,10 @@ def recommencer():
             break  # on sort de la boucle après relance
         elif choix == "non":
             print(tr("Le jeu se fermera dans 5 secondes..."))
-            time.sleep(5)
+            time.sleep(2)
+            reddit_url="https://www.reddit.com/r/FreePython/"
+            print:("follow me non reddit at {reddit_url}")
+            time.sleep(3)
             sys.exit()
         else:
             print(tr("Choix invalide. Réponds par oui ou non."))
@@ -835,7 +838,7 @@ def combat(joueur, ennemi):
         print(tr("Fin de la partie."))
         print(tr("Merci d'avoir joué !"))
         recommencer()
-        reddit_url = "https://www.reddit.com/r/unknown/"
+        reddit_url = "https://www.reddit.com/r/FreePython/"
         print(f"Rejoignez ma communauté sur Reddit : {reddit_url}")
         print("Le jeu se fermera dans 5 secondes...")
         time.sleep(5)
