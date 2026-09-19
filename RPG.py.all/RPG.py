@@ -8,7 +8,7 @@ import webbrowser
 import time
 import json
 import os
-# Langue par défaut ("fr" ou "en")
+# Langue par défaut ("fr" ou "en") carte
 LANG = "fr"
 # Traductions : clé = texte français original, valeur = texte anglais
 TRANSLATIONS_EN = {
@@ -83,6 +83,9 @@ TRANSLATIONS_EN = {
     "- Le marais maudit est le domaine du Roi du Marais": "- The cursed swamp is the domain of the Swamp King",
     "- Et attention au Tyran de Feu dans le volcan!": "- And beware the Fire Tyrant in the volcano!",
     "Tu as dormi à l'auberge : PV restaurés et sauvegarde automatique.": "You slept at the inn: HP restored and auto-saved.",
+    "{name} obtient : {item} x{qty} {stars}": "{name} obtains: {item} x{qty} {stars}",
+    "Nouvelle quête : {quest} (objectif : {qty} {target})": "New quest: {quest} (objective: {qty} {target})",
+    "Quête terminée : {name}": "Quest completed: {name}",
     "Votre choix : ": "Your choice: ",
     "Bienvenue chez l'apothicaire! J'ai les meilleures potions de la région.": "Welcome to the apothecary! I have the best potions in the region.",
     "1. Acheter une potion (5 pièces d'or)": "1. Buy a potion (5 gold)",
@@ -151,6 +154,40 @@ def tprint(template, **kwargs):
 def tinput(prompt, **kwargs):
     """Input with translated prompt."""
     return input(tr(prompt, **kwargs))
+
+def tprints(*lines):
+    for line in lines:
+        tprint(line)
+
+def choose_int(prompt, minval=0, maxval=None):
+    try:
+        valeur = int(tinput(prompt))
+        return valeur if (maxval is None or minval <= valeur <= maxval) else None
+    except ValueError:
+        return None
+
+def can_pay(joueur, montant):
+    return joueur.inventaire.get("Or", 0) >= montant
+
+def spend(joueur, montant):
+    if not can_pay(joueur, montant):
+        tprint("Tu n'as pas assez d'or!")
+        return False
+    joueur.inventaire["Or"] -= montant
+    return True
+
+def service_menu(joueur, title, options):
+    tprint(title)
+    for i, (label, action) in enumerate(options, 1):
+        tprint(f"{i}. {label}")
+    tprint("0. Partir")
+    choix = choose_int("Votre choix : ", 0, len(options))
+    if choix is None:
+        tprint("Entrée invalide!")
+        return
+    if choix == 0:
+        return
+    options[choix - 1][1]()
 
 # Traductions de noms (ennemis, objets, lieux, quêtes)
 NAME_TRANSLATIONS_EN = {
@@ -318,123 +355,88 @@ MAP_POSITIONS = {
 }
 
 def afficher_carte(joueur):
-    print("\n" + "="*60)
-    time.sleep(0.1)
-    print(tr("CARTE DU MONDE"))
-    time.sleep(0.1)
-    print("="*60)
-    time.sleep(0.1)
-    
-    # Use module-level constants to avoid recreating these structures repeatedly
-    positions = MAP_POSITIONS
+    tprints(
+        "\n" + "="*60,
+        tr("CARTE DU MONDE"),
+        "="*60,
+    )
 
-    # Créer une grille
+    positions = MAP_POSITIONS
     largeur = MAP_WIDTH
     hauteur = MAP_HEIGHT
     grille = [['.' for _ in range(largeur)] for _ in range(hauteur)]
-    
-    # Placer les lieux
+
     for lieu, (x, y) in positions.items():
         if y < hauteur and x < largeur:
-            if lieu == "Tour Interdite":
-                grille[y][x:x+2] = ['T', 'I']
-            elif lieu == "Chambre du Trésor":
-                grille[y][x:x+2] = ['C', 'T']
-            elif lieu == "Village":
-                grille[y][x:x+2] = ['V', 'L']
-            elif lieu == "Château":
-                grille[y][x:x+2] = ['C', 'H']
-            elif lieu == "Marais Maudit":
-                grille[y][x:x+2] = ['M', 'M']
-            elif lieu == "Volcan de Feu":
-                grille[y][x:x+2] = ['V', 'F']
-            elif lieu == "Forêt":
-                grille[y][x:x+2] = ['F', 'R']
-            elif lieu == "Souterrain":
-                grille[y][x:x+2] = ['S', 'T']
-    
-    # Placer le joueur
+            codes = {
+                "Tour Interdite": ['T', 'I'],
+                "Chambre du Trésor": ['C', 'T'],
+                "Village": ['V', 'L'],
+                "Château": ['C', 'H'],
+                "Marais Maudit": ['M', 'M'],
+                "Volcan de Feu": ['V', 'F'],
+                "Forêt": ['F', 'R'],
+                "Souterrain": ['S', 'T'],
+            }
+            grille[y][x:x+2] = codes.get(lieu, ['?', '?'])
+
     if joueur.localisation in positions:
         px, py = positions[joueur.localisation]
         if py < hauteur and px < largeur:
-            grille[py][px] = '@'  # Point pour le joueur (@ = Player)
-    
-    # Afficher la grille
+            grille[py][px] = '@'
+
     for ligne in grille:
         print(''.join(ligne))
         time.sleep(0.1)
-    
-    print("\n" + "-"*60)
-    time.sleep(0.1)
-    print(tr("Légende:"))
-    time.sleep(0.1)
-    print(tr("  @ = Ta position"))
-    time.sleep(0.1)
-    print(tr("  VI = Village | FR = Forêt | ST = Souterrain"))
-    time.sleep(0.1)
-    print(tr("  CH = Château | MM = Marais Maudit | VF = Volcan de Feu"))
-    time.sleep(0.1)
-    print(tr("  TI = Tour Interdite | CT = Chambre du Trésor"))
-    time.sleep(0.1)
-    print("-"*60)
-    time.sleep(0.1)
-    
-    # Afficher les infos du lieu
+
+    tprints(
+        "\n" + "-"*60,
+        tr("Légende:"),
+        tr("  @ = Ta position"),
+        tr("  VI = Village | FR = Forêt | ST = Souterrain"),
+        tr("  CH = Château | MM = Marais Maudit | VF = Volcan de Feu"),
+        tr("  TI = Tour Interdite | CT = Chambre du Trésor"),
+        "-"*60,
+    )
+
     if joueur.localisation in locations:
         lieu = locations[joueur.localisation]
-        print(tr("\n{loc}", loc=name_tr(joueur.localisation)))
-        time.sleep(0.1)
-        print(f"   {desc_tr(lieu['description'])}")
-        time.sleep(0.1)
-        print(tr("\n   Connexions:"))
-        time.sleep(0.1)
+        tprint(tr("\n{loc}", loc=name_tr(joueur.localisation)))
+        tprint(f"   {desc_tr(lieu['description'])}")
+        tprint(tr("\n   Connexions:"))
         for destination, direction in lieu["connections"].items():
             locked_str = " [LOCKED]" if locations[destination].get("locked") else ""
-            print(tr("     • {dest} ({dir}){locked}", dest=name_tr(destination), dir=direction, locked=locked_str))
-            time.sleep(0.1)
-    print("="*60 + "\n")
-    time.sleep(0.1)
+            tprint("     • {dest} ({dir}){locked}", dest=name_tr(destination), dir=direction, locked=locked_str)
+    tprint("="*60 + "\n")
 
 def voyager(joueur, destination):
     if joueur.localisation not in locations:
-        print(tr("Erreur: localisation inconnue!"))
-        time.sleep(0.1)
-        return False
-    
-    lieu_actuel = locations[joueur.localisation]
-    if destination in lieu_actuel["connections"]:
-        # Vérifier si la destination est verrouillée
-        if locations[destination].get("locked"):
-            item_req, quantite_req = locations[destination].get("requirement")
-            quantite_possedee = joueur.inventaire.get(item_req, 0)
-            if quantite_possedee < quantite_req:
-                print(tr("\nCette porte est verrouillée!"))
-                time.sleep(0.1)
-                print(tr("Tu as besoin de {quant} {item}(s) pour l'ouvrir.", quant=quantite_req, item=item_req))
-                time.sleep(0.1)
-                print(tr("Tu en possèdes: {have}/{need}", have=quantite_possedee, need=quantite_req))
-                time.sleep(0.1)
-                return False
-            else:
-                print(tr("\nTu utilises {quant} {item}(s) pour ouvrir la porte!", quant=quantite_req, item=item_req))
-                time.sleep(0.1)
-                joueur.inventaire[item_req] -= quantite_req
-        
-        direction = lieu_actuel["connections"][destination]
-        joueur.localisation = destination
-        # reset du dernier spawn quand on change de zone (nouvelle zone = nouvelles rencontres)
-        joueur.last_spawned_enemy = None
-        print(tr("\n  Tu voyages vers le {direction}...", direction=direction))
-        time.sleep(0.1)
-        print(tr("Bienvenue à {destination}!", destination=destination))
-        time.sleep(0.1)
-        afficher_carte(joueur)
-        return True
-    else:
-        print(tr("Il n'y a pas de chemin vers cette destination depuis ici."))
-        time.sleep(0.1)
+        tprint("Erreur: localisation inconnue!")
         return False
 
+    lieu_actuel = locations[joueur.localisation]
+    if destination not in lieu_actuel["connections"]:
+        tprint("Il n'y a pas de chemin vers cette destination depuis ici.")
+        return False
+
+    if locations[destination].get("locked"):
+        item_req, quantite_req = locations[destination].get("requirement")
+        quantite_possedee = joueur.inventaire.get(item_req, 0)
+        if quantite_possedee < quantite_req:
+            tprint("\nCette porte est verrouillée!")
+            tprint("Tu as besoin de {quant} {item}(s) pour l'ouvrir.", quant=quantite_req, item=item_req)
+            tprint("Tu en possèdes: {have}/{need}", have=quantite_possedee, need=quantite_req)
+            return False
+        joueur.inventaire[item_req] -= quantite_req
+        tprint("\nTu utilises {quant} {item}(s) pour ouvrir la porte!", quant=quantite_req, item=item_req)
+
+    direction = lieu_actuel["connections"][destination]
+    joueur.localisation = destination
+    joueur.last_spawned_enemy = None
+    tprint("\n  Tu voyages vers le {direction}...", direction=direction)
+    tprint("Bienvenue à {destination}!", destination=destination)
+    afficher_carte(joueur)
+    return True
 # --- Système de Sauvegarde ---
 SAVE_DIR = "saves"
 if not os.path.exists(SAVE_DIR):
@@ -462,16 +464,14 @@ def sauvegarder_jeu(joueur, nom_sauvegarde="save"):
     chemin_fichier = os.path.join(SAVE_DIR, f"{nom_sauvegarde}.json")
     with open(chemin_fichier, 'w', encoding='utf-8') as f:
         json.dump(donnees, f, ensure_ascii=False, indent=2)
-    print(tr("Sauvegarde créée: {name}", name=nom_sauvegarde))
-    time.sleep(0.1)
+    tprint(tr("Sauvegarde créée: {name}", name=nom_sauvegarde))
 
 def charger_jeu(nom_sauvegarde="save"):
     """Charge la progression du joueur"""
     chemin_fichier = os.path.join(SAVE_DIR, f"{nom_sauvegarde}.json")
     
     if not os.path.exists(chemin_fichier):
-        print(tr("Sauvegarde '{name}' non trouvée!", name=nom_sauvegarde))
-        time.sleep(0.1)
+        tprint(tr("Sauvegarde '{name}' non trouvée!", name=nom_sauvegarde))
         return None
     
     with open(chemin_fichier, 'r', encoding='utf-8') as f:
@@ -492,8 +492,7 @@ def charger_jeu(nom_sauvegarde="save"):
             joueur.quete.progression = donnees["quete"]["progression"]
             joueur.quete.terminee = donnees["quete"]["terminee"]
     
-    print(f"Sauvegarde chargée: {nom_sauvegarde}") 
-    time.sleep(0.1)
+    tprint(f"Sauvegarde chargée: {nom_sauvegarde}")
     return joueur
 
 def lister_sauvegardes():
@@ -509,12 +508,12 @@ def recommencer():
         if choix == "oui":
             break  # on sort de la boucle après relance
         elif choix == "non":
-            print(tr("Le jeu se fermera dans 5 secondes..."))
+            tprint(tr("Le jeu se fermera dans 5 secondes..."))
             time.sleep(5)
+            tprint(tr("rejoignez-nous sur Discord pour plus de contenu et d'aide : {url}", url="https://discord.gg/8CmNRjJHnk"))
             sys.exit()
         else:
-            print(tr("Choix invalide. Réponds par oui ou non."))
-            time.sleep(0.1)
+            tprint(tr("Choix invalide. Réponds par oui ou non."))
 # --- Définition des raretés ---
 raretes = {
     "Potion": "★",
@@ -570,13 +569,13 @@ class Personnage:
     def attaquer(self, cible):
         degats = max(1, self.attaque - cible.defense)  # minimum 1 dégât
         cible.subir_degats(degats)
-        print(f"{self.nom} attaque {cible.nom} et inflige {degats} dégâts.")
+        tprint("{name} attaque {target} et inflige {degats} dégâts.", name=self.nom, target=cible.nom, degats=degats)
         time.sleep(0.1)
 
     def loot(self, objet, quantite=1):
         self.inventaire[objet] = self.inventaire.get(objet, 0) + quantite
         etoiles = raretes.get(objet, "")
-        print(f"{self.nom} obtient : {name_tr(objet)} x{quantite} {etoiles}")
+        tprint("{name} obtient : {item} x{qty} {stars}", name=self.nom, item=name_tr(objet), qty=quantite, stars=etoiles)
         time.sleep(0.1)
         verifier_quete(self, loot=objet)
 
@@ -628,7 +627,7 @@ class Quete:
             self.progression += 1
         if self.progression >= self.quantite:
             self.terminee = True
-            print(f"Quête terminée : {self.nom}")
+            tprint("Quête terminée : {name}", name=self.nom)
             time.sleep(0.1)
             return self.recompense
         return None
@@ -637,20 +636,29 @@ def donner_quete(joueur):
     quete_data = random.choice(quetes_possibles)
     quete = Quete(quete_data["nom"], quete_data["objectif"], quete_data["recompense"])
     joueur.quete = quete
-    print(f"Nouvelle quête : {name_tr(quete.nom)} (objectif : {quete.quantite} {name_tr(quete.cible)})")
-    time.sleep(0.1)
+    tprint("Nouvelle quête : {quest} (objectif : {qty} {target})", quest=name_tr(quete.nom), qty=quete.quantite, target=name_tr(quete.cible))
 
 def verifier_quete(joueur, ennemi=None, loot=None):
-    if joueur.quete and not joueur.quete.terminee:
-        recompense = joueur.quete.avancer(ennemi, loot)
-        if recompense:
-            type_r, valeur = recompense
-            if type_r == "XP":
-                joueur.gagner_xp(valeur)
-            elif type_r == "Or":
-                joueur.loot("Or", valeur)
-            else:
-                joueur.loot(type_r, valeur)
+    """Check and advance the player's active quest when they defeat an enemy or obtain loot.
+
+    If the quest completes, apply the reward to the player.
+    """
+    if not joueur or not getattr(joueur, 'quete', None):
+        return None
+    if joueur.quete.terminee:
+        return None
+
+    recompense = joueur.quete.avancer(ennemi, loot)
+    if recompense:
+        type_r, valeur = recompense
+        if type_r == "XP":
+            joueur.gagner_xp(valeur)
+        elif type_r == "Or":
+            joueur.loot("Or", valeur)
+        else:
+            joueur.loot(type_r, valeur)
+        return recompense
+    return None
 
 # --- Bosses ---
 boss_possibles = [
@@ -754,26 +762,21 @@ def combat(joueur, ennemi):
     brulure = 0   # -2 PV par tour pendant N tours
     stun = False  # saute le tour du joueur
 
-    print(tr("Un combat commence contre {enn} !", enn=name_tr(ennemi.nom)))
-    time.sleep(0.1)
+    tprint(tr("Un combat commence contre {enn} !", enn=name_tr(ennemi.nom)))
 
     while joueur.est_vivant() and ennemi.est_vivant():
         # Statuts persistants
         if poison > 0:
             joueur.pv = max(0, joueur.pv - 3)
             poison -= 1
-            print(f"{joueur.nom} souffre du poison (-3 PV).")
-            time.sleep(0.1)
+            tprint(f"{joueur.nom} souffre du poison (-3 PV).")
         if brulure > 0:
             joueur.pv = max(0, joueur.pv - 2)
             brulure -= 1
-            print(f"{joueur.nom} est brûlé (-2 PV).")
-            time.sleep(0.1)
+            tprint(f"{joueur.nom} est brûlé (-2 PV).")
 
-        print(f"\n{joueur.nom} : {joueur.pv}/{joueur.pv_max} PV | ATK {joueur.attaque} | DEF {joueur.defense}")
-        time.sleep(0.1)
-        print(f"{ennemi.nom} : {ennemi.pv}/{ennemi.pv_max} PV | ATK {ennemi.attaque} | DEF {ennemi.defense}")
-        time.sleep(0.1)
+        tprint(f"\n{joueur.nom} : {joueur.pv}/{joueur.pv_max} PV | ATK {joueur.attaque} | DEF {joueur.defense}")
+        tprint(f"{ennemi.nom} : {ennemi.pv}/{ennemi.pv_max} PV | ATK {ennemi.attaque} | DEF {ennemi.defense}")
 
         # Tour du joueur
         if stun:
@@ -988,337 +991,145 @@ def combat(joueur, ennemi):
         time.sleep(5)
         sys.exit()
 
+def shop_handler(joueur, title, items):
+    tprint(title)
+    for i, (item, price) in enumerate(items, 1):
+        tprint(f"{i}. {name_tr(item)} - {tr('Prix: {price} or', price=price)}")
+    choix = choose_int("Que veux-tu acheter? (numéro ou 0 pour quitter) : ", 0, len(items))
+    if choix is None or choix == 0:
+        return
+    item, price = items[choix - 1]
+    if not spend(joueur, price):
+        return
+    joueur.loot(item, 1)
+    tprint("Achat effectué!")
+
 def interagir_avec_pnj(joueur, npc_nom):
-    if npc_nom == "Tavernier du village":
-        print(tr("Bienvenue à la taverne! Que puis-je vous servir?"))
-        time.sleep(0.1)
-        print(tr("1. Boire une bière (5 pièces d'or) - Restaure 10 PV"))
-        time.sleep(0.1)
-        print(tr("2. Manger un peu de pain (5 pièces d'or) - Restaure 10 PV"))
-        time.sleep(0.1)
-        print(tr("3. Demander des informations sur la région"))
-        time.sleep(0.1)
-        print(tr("4. Dormir à l'auberge (100% PV, sauvegarde auto)"))
-        time.sleep(0.1)
-        print(tr("0. Partir"))
-        time.sleep(0.1)
-        try:
-            choix = int(tinput("Votre choix : "))
-            if choix == 1:
-                or_joueur = joueur.inventaire.get("Or", 0)
-                if or_joueur >= 2:
-                    joueur.inventaire["Or"] -= 2
-                    joueur.pv = min(joueur.pv_max, joueur.pv + 10)
-                    print(tr("Vous vous sentez revigoré! +10 PV"))
-                    time.sleep(0.1)
-                else:
-                    print(tr("Tu n'as pas assez d'or!"))
-                    time.sleep(0.1)
-            elif choix == 2:
-                or_joueur = joueur.inventaire.get("Or", 0)
-                if or_joueur >= 5:
-                    joueur.inventaire["Or"] -= 5
-                    joueur.pv = min(joueur.pv_max, joueur.pv + 25)
-                    print(tr("Le vin vous revigore complètement! +25 PV"))
-                    time.sleep(0.1)
-                else:
-                    print(tr("Tu n'as pas assez d'or!"))
-                    time.sleep(0.1)
-            elif choix == 3:
-                print(tr("Le tavernier vous raconte des histoires sur les monstres des environs..."))
-                time.sleep(0.1)
-                print(tr("- La forêt est infestée de plantes carnivores et de spectres"))
-                time.sleep(0.1)
-                print(tr("- Le château abrite des vampires et des sorciers corrompus"))
-                time.sleep(0.1)
-                print(tr("- Le marais maudit est le domaine du Roi du Marais"))
-                time.sleep(0.1)
-                print(tr("- Et attention au Tyran de Feu dans le volcan!"))
-                time.sleep(0.1)
-            elif choix == 4:
-                joueur.pv = joueur.pv_max
-                print(tr("Tu as dormi à l'auberge : PV restaurés et sauvegarde automatique."))
-                time.sleep(0.1)
-                sauvegarder_jeu(joueur, f"auto_sleep_{joueur.nom}")
-            elif choix == 0:
-                return
-            else:
-                print(tr("Choix invalide."))
-                time.sleep(0.1)
-        except (ValueError, IndexError):
-            print(tr("Entrée invalide!"))
-            time.sleep(0.1)
-    elif npc_nom == "Vendeur de potions":
-        print(tr("Bienvenue chez l'apothicaire! J'ai les meilleures potions de la région."))
-        time.sleep(0.1)
-        print(tr("1. Acheter une potion de soin (5 pièces d'or)"))
-        time.sleep(0.1)
-        print(tr("2. Acheter une potion de soin supérieure (25 pièces d'or) - Restaure 50 PV"))
-        time.sleep(0.1)
-        print(tr("0. Partir"))
-        time.sleep(0.1)
-        try:
-            choix = int(tinput("Votre choix : "))
-            if choix == 1:
-                or_joueur = joueur.inventaire.get("Or", 0)
-                if or_joueur >= 5:
-                    joueur.inventaire["Or"] -= 5
-                    joueur.loot("Potion", 1)
-                    print(tr("Vous avez acheté une potion!"))
-                    time.sleep(0.1)
-                else:
-                    print(tr("Tu n'as pas assez d'or!"))
-                    time.sleep(0.1)
-            elif choix == 2:
-                or_joueur = joueur.inventaire.get("Or", 0)
-                if or_joueur >= 15:
-                    joueur.inventaire["Or"] -= 15
-                    joueur.loot("Élixir", 1)
-                    print(tr("Vous avez acheté un élixir!"))
-                    time.sleep(0.1)
-                else:
-                    print(tr("Tu n'as pas assez d'or!"))
-                    time.sleep(0.1)
-            elif choix == 3:
-                or_joueur = joueur.inventaire.get("Or", 0)
-                if or_joueur >= 25:
-                    joueur.inventaire["Or"] -= 25
-                    joueur.loot("Potion supérieure", 1)
-                    print(tr("Vous avez acheté une potion de soin supérieure!"))
-                    time.sleep(0.1)
-                else:
-                    print(tr("Tu n'as pas assez d'or!"))
-                    time.sleep(0.1)
-            elif choix == 0:
-                return
-            else:
-                print(tr("Choix invalide."))
-                time.sleep(0.1)
-        except (ValueError, IndexError):
-            print(tr("Entrée invalide!"))
-            time.sleep(0.1)
-    elif npc_nom == "Marchand":
-        print(tr("Bienvenue chez le marchand!"))
-        time.sleep(0.1)
-        print(tr("Voici ce que j'ai en stock:"))
-        time.sleep(0.1)
-        shop_items = [
+    def drink_beer():
+        if spend(joueur, 2):
+            joueur.pv = min(joueur.pv_max, joueur.pv + 10)
+            tprint("Vous vous sentez revigoré! +10 PV")
+
+    def eat_bread():
+        if spend(joueur, 5):
+            joueur.pv = min(joueur.pv_max, joueur.pv + 10)
+            tprint("Le vin vous revigore complètement! +25 PV")
+
+    def tavern_info():
+        tprint("Le tavernier vous raconte des histoires sur les monstres des environs...")
+        for line in [
+            "- La forêt est infestée de plantes carnivores et de spectres",
+            "- Le château abrite des vampires et des sorciers corrompus",
+            "- Le marais maudit est le domaine du Roi du Marais",
+            "- Et attention au Tyran de Feu dans le volcan!"
+        ]:
+            tprint(line)
+
+    def sleep_inn():
+        joueur.pv = joueur.pv_max
+        tprint("Tu as dormi à l'auberge : PV restaurés et sauvegarde automatique.")
+        sauvegarder_jeu(joueur, f"auto_sleep_{joueur.nom}")
+
+    def improve_attack():
+        if spend(joueur, 20):
+            joueur.attaque += 2
+            tprint("Votre attaque a été améliorée! +2 ATK")
+
+    def improve_defense():
+        if spend(joueur, 15):
+            joueur.defense += 1
+            tprint("Votre défense a été améliorée! +1 DEF")
+
+    def rest_half():
+        if spend(joueur, 10):
+            joueur.pv = min(joueur.pv_max, joueur.pv + joueur.pv_max // 2)
+            tprint("Vous vous reposez. +50% PV")
+
+    def rest_full():
+        if spend(joueur, 20):
+            joueur.pv = joueur.pv_max
+            tprint("Vous dormez complètement. PV restaurés.")
+
+    def quest_advice():
+        if joueur.quete:
+            tprint("Votre quête vous mènera vers {cible}. Soyez prudent.", cible=name_tr(joueur.quete.cible))
+        else:
+            tprint("Vous n'avez pas de quête active.")
+
+    def blessing():
+        if spend(joueur, 30):
+            joueur.pv_max += 5
+            joueur.pv = min(joueur.pv_max, joueur.pv + 5)
+            tprint("Vous recevez une bénédiction! +5 PV max")
+
+    def sell_stolen():
+        objet = tinput("Objet : ").strip()
+        if objet in joueur.inventaire and joueur.inventaire[objet] > 0:
+            joueur.inventaire[objet] -= 1
+            joueur.inventaire["Or"] = joueur.inventaire.get("Or", 0) + 20
+            tprint("Vendu pour {prix} or!", prix=20)
+        else:
+            tprint("Objet non trouvé.")
+
+    def thief_quest():
+        tprint("Quête acceptée : Volez une potion au vendeur. Revenez avec.")
+        joueur.loot("Or", 50)
+        tprint("Quête terminée! +50 or")
+
+    def buy_book():
+        if spend(joueur, 25):
+            joueur.gagner_xp(10)
+            tprint("Vous apprenez de nouvelles choses! +10 XP")
+
+    def story():
+        tprint("Il y a longtemps, le monde était en paix... Mais les dragons ont apporté le chaos.")
+
+    menus = {
+        "Tavernier du village": lambda: service_menu(joueur, "Bienvenue à la taverne! Que puis-je vous servir?", [
+            ("Boire une bière (5 pièces d'or) - Restaure 10 PV", drink_beer),
+            ("Manger un peu de pain (5 pièces d'or) - Restaure 10 PV", eat_bread),
+            ("Demander des informations sur la région", tavern_info),
+            ("Dormir à l'auberge (100% PV, sauvegarde auto)", sleep_inn),
+        ]),
+        "Vendeur de potions": lambda: shop_handler(joueur, "Bienvenue chez l'apothicaire! J'ai les meilleures potions de la région.", [
+            ("Potion", 5),
+            ("Élixir", 15),
+            ("Potion supérieure", 25),
+        ]),
+        "Marchand": lambda: shop_handler(joueur, "Bienvenue chez le marchand! Voici ce que j'ai en stock:", [
             ("Épée magique", 50),
             ("Bouclier", 30),
             ("Anneau de Force", 40),
             ("Cape d'Invisibilité", 60),
-            ("Amulette de Vie", 45)
-        ]
-        for i, (item, price) in enumerate(shop_items, 1):
-            print(f"{i}. {name_tr(item)} - {tr('Prix: {price} or', price=price)}")
-            time.sleep(0.1)
-        try:
-            choix_achat = int(tinput("Que veux-tu acheter? (numéro ou 0 pour quitter) : "))
-            if choix_achat == 0:
-                return
-            if 1 <= choix_achat <= len(shop_items):
-                item, price = shop_items[choix_achat - 1]
-                or_joueur = joueur.inventaire.get("Or", 0)
-                if or_joueur >= price:
-                    joueur.inventaire["Or"] -= price
-                    joueur.loot(item, 1)
-                    print(tr("Achat effectué!"))
-                    time.sleep(0.1)
-                else:
-                    print(tr("Tu n'as pas assez d'or!"))
-                    time.sleep(0.1)
-            else:
-                print(tr("Objet invalide!"))
-                time.sleep(0.1)
-        except (ValueError, IndexError):
-            print(tr("Entrée invalide!"))
-            time.sleep(0.1)
-    elif npc_nom == "Forgeron":
-        print(tr("Bienvenue chez le forgeron! J'améliore vos armes et armures."))
-        time.sleep(0.1)
-        print(tr("1. Améliorer l'attaque (+2 ATK, 20 or)"))
-        time.sleep(0.1)
-        print(tr("2. Améliorer la défense (+1 DEF, 15 or)"))
-        time.sleep(0.1)
-        print(tr("0. Partir"))
-        time.sleep(0.1)
-        try:
-            choix = int(tinput("Votre choix : "))
-            if choix == 1:
-                or_joueur = joueur.inventaire.get("Or", 0)
-                if or_joueur >= 20:
-                    joueur.inventaire["Or"] -= 20
-                    joueur.attaque += 2
-                    print(tr("Votre attaque a été améliorée! +2 ATK"))
-                    time.sleep(0.1)
-                else:
-                    print(tr("Tu n'as pas assez d'or!"))
-                    time.sleep(0.1)
-            elif choix == 2:
-                or_joueur = joueur.inventaire.get("Or", 0)
-                if or_joueur >= 15:
-                    joueur.inventaire["Or"] -= 15
-                    joueur.defense += 1
-                    print(tr("Votre défense a été améliorée! +1 DEF"))
-                    time.sleep(0.1)
-                else:
-                    print(tr("Tu n'as pas assez d'or!"))
-                    time.sleep(0.1)
-            elif choix == 0:
-                return
-            else:
-                print(tr("Choix invalide."))
-                time.sleep(0.1)
-        except (ValueError, IndexError):
-            print(tr("Entrée invalide!"))
-            time.sleep(0.1)
-    elif npc_nom == "Aubergiste":
-        print(tr("Bienvenue à l'auberge! Reposez-vous ici."))
-        time.sleep(0.1)
-        print(tr("1. Dormir (restaure 50% PV, 10 or)"))
-        time.sleep(0.1)
-        print(tr("2. Dormir complètement (100% PV, 20 or)"))
-        time.sleep(0.1)
-        print(tr("0. Partir"))
-        time.sleep(0.1)
-        try:
-            choix = int(tinput("Votre choix : "))
-            if choix == 1:
-                or_joueur = joueur.inventaire.get("Or", 0)
-                if or_joueur >= 10:
-                    joueur.inventaire["Or"] -= 10
-                    joueur.pv = min(joueur.pv_max, joueur.pv + joueur.pv_max // 2)
-                    print(tr("Vous vous reposez. +50% PV"))
-                    time.sleep(0.1)
-                else:
-                    print(tr("Tu n'as pas assez d'or!"))
-                    time.sleep(0.1)
-            elif choix == 2:
-                or_joueur = joueur.inventaire.get("Or", 0)
-                if or_joueur >= 20:
-                    joueur.inventaire["Or"] -= 20
-                    joueur.pv = joueur.pv_max
-                    print(tr("Vous dormez complètement. PV restaurés."))
-                    time.sleep(0.1)
-                else:
-                    print(tr("Tu n'as pas assez d'or!"))
-                    time.sleep(0.1)
-            elif choix == 0:
-                return
-            else:
-                print(tr("Choix invalide."))
-                time.sleep(0.1)
-        except (ValueError, IndexError):
-            print(tr("Entrée invalide!"))
-            time.sleep(0.1)
-    elif npc_nom == "Mystique":
-        print(tr("Les étoiles me parlent... Que cherchez-vous?"))
-        time.sleep(0.1)
-        print(tr("1. Conseil sur la quête (+ indice)"))
-        time.sleep(0.1)
-        print(tr("2. Bénédiction (+5 PV max temporaire, 30 or)"))
-        time.sleep(0.1)
-        print(tr("0. Partir"))
-        time.sleep(0.1)
-        try:
-            choix = int(tinput("Votre choix : "))
-            if choix == 1:
-                if joueur.quete:
-                    print(tr("Votre quête vous mènera vers {cible}. Soyez prudent.", cible=name_tr(joueur.quete.cible)))
-                    time.sleep(0.1)
-                else:
-                    print(tr("Vous n'avez pas de quête active."))
-                    time.sleep(0.1)
-            elif choix == 2:
-                or_joueur = joueur.inventaire.get("Or", 0)
-                if or_joueur >= 30:
-                    joueur.inventaire["Or"] -= 30
-                    joueur.pv_max += 5
-                    joueur.pv = min(joueur.pv_max, joueur.pv + 5)
-                    print(tr("Vous recevez une bénédiction! +5 PV max"))
-                    time.sleep(0.1)
-                else:
-                    print(tr("Tu n'as pas assez d'or!"))
-                    time.sleep(0.1)
-            elif choix == 0:
-                return
-            else:
-                print(tr("Choix invalide."))
-                time.sleep(0.1)
-        except (ValueError, IndexError):
-            print(tr("Entrée invalide!"))
-            time.sleep(0.1)
-    elif npc_nom == "Contact de la Guilde des Voleurs":
-        print(tr("Psst... Besoin d'aide discrète?"))
-        time.sleep(0.1)
-        print(tr("1. Vendre un objet volé (double prix)"))
-        time.sleep(0.1)
-        print(tr("2. Quête secondaire : Voler un objet (récompense 50 or)"))
-        time.sleep(0.1)
-        print(tr("0. Partir"))
-        time.sleep(0.1)
-        try:
-            choix = int(tinput("Votre choix : "))
-            if choix == 1:
-                print(tr("Quel objet vendez-vous? (nom exact)"))
-                time.sleep(0.1)
-                objet = tinput("Objet : ").strip()
-                if objet in joueur.inventaire and joueur.inventaire[objet] > 0:
-                    prix = 10  # base, but double for stolen
-                    joueur.inventaire[objet] -= 1
-                    joueur.inventaire["Or"] = joueur.inventaire.get("Or", 0) + prix * 2
-                    print(tr("Vendu pour {prix} or!", prix=prix*2))
-                    time.sleep(0.1)
-                else:
-                    print(tr("Objet non trouvé."))
-                    time.sleep(0.1)
-            elif choix == 2:
-                print(tr("Quête acceptée : Volez une potion au vendeur. Revenez avec."))
-                time.sleep(0.1)
-                # Simple, assume they do it
-                joueur.loot("Or", 50)
-                print(tr("Quête terminée! +50 or"))
-                time.sleep(0.1)
-            elif choix == 0:
-                return
-            else:
-                print(tr("Choix invalide."))
-                time.sleep(0.1)
-        except (ValueError, IndexError):
-            print(tr("Entrée invalide!"))
-            time.sleep(0.1)
-    elif npc_nom == "Savant":
-        print(tr("Bienvenue dans ma bibliothèque. La connaissance est pouvoir."))
-        time.sleep(0.1)
-        print(tr("1. Acheter un livre de sagesse (+10 XP, 25 or)"))
-        time.sleep(0.1)
-        print(tr("2. Histoire du monde"))
-        time.sleep(0.1)
-        print(tr("0. Partir"))
-        time.sleep(0.1)
-        try:
-            choix = int(tinput("Votre choix : "))
-            if choix == 1:
-                or_joueur = joueur.inventaire.get("Or", 0)
-                if or_joueur >= 25:
-                    joueur.inventaire["Or"] -= 25
-                    joueur.gagner_xp(10)
-                    print(tr("Vous apprenez de nouvelles choses! +10 XP"))
-                    time.sleep(0.1)
-                else:
-                    print(tr("Tu n'as pas assez d'or!"))
-                    time.sleep(0.1)
-            elif choix == 2:
-                print(tr("Il y a longtemps, le monde était en paix... Mais les dragons ont apporté le chaos."))
-                time.sleep(0.1)
-            elif choix == 0:
-                return
-            else:
-                print(tr("Choix invalide."))
-                time.sleep(0.1)
-        except (ValueError, IndexError):
-            print(tr("Entrée invalide!"))
-            time.sleep(0.1)
+            ("Amulette de Vie", 45),
+        ]),
+        "Forgeron": lambda: service_menu(joueur, "Bienvenue chez le forgeron! J'améliore vos armes et armures.", [
+            ("Améliorer l'attaque (+2 ATK, 20 or)", improve_attack),
+            ("Améliorer la défense (+1 DEF, 15 or)", improve_defense),
+        ]),
+        "Aubergiste": lambda: service_menu(joueur, "Bienvenue à l'auberge! Reposez-vous ici.", [
+            ("Dormir (restaure 50% PV, 10 or)", rest_half),
+            ("Dormir complètement (100% PV, 20 or)", rest_full),
+        ]),
+        "Mystique": lambda: service_menu(joueur, "Les étoiles me parlent... Que cherchez-vous?", [
+            ("Conseil sur la quête (+ indice)", quest_advice),
+            ("Bénédiction (+5 PV max temporaire, 30 or)", blessing),
+        ]),
+        "Contact de la Guilde des Voleurs": lambda: service_menu(joueur, "Psst... Besoin d'aide discrète?", [
+            ("Vendre un objet volé (double prix)", sell_stolen),
+            ("Quête secondaire : Voler un objet (récompense 50 or)", thief_quest),
+        ]),
+        "Savant": lambda: service_menu(joueur, "Bienvenue dans ma bibliothèque. La connaissance est pouvoir.", [
+            ("Acheter un livre de sagesse (+10 XP, 25 or)", buy_book),
+            ("Histoire du monde", story),
+        ]),
+    }
+
+    handler = menus.get(npc_nom)
+    if handler:
+        handler()
+    else:
+        tprint("Choix invalide.")
 
 # --- Menu principal ---
 def menu_principal(joueur):
@@ -1335,26 +1146,19 @@ def menu_principal(joueur):
         time.sleep(0.1)
         print()
         time.sleep(0.1)
-        print(tr("1. Combattre un ennemi"))
-        time.sleep(0.1)
-        print(tr("2. Affronter un boss (si disponible)"))
-        time.sleep(0.1)
-        print(tr("3. Affronter le SUPERBOSS"))
-        time.sleep(0.1)
-        print(tr("4. Voir inventaire"))
-        time.sleep(0.1)
-        print(tr("5. Voir quête active"))
-        time.sleep(0.1)
-        print(tr("6. Voir la carte"))
-        time.sleep(0.1)
-        print(tr("7. Voyager vers une autre région"))
-        time.sleep(0.1)
-        print(tr("8. Sauvegarder la progression"))
-        time.sleep(0.1)
-        print(tr("9. Quitter"))
-        time.sleep(0.1)
-        print(tr("10. Interagir avec les habitants (en devloppement)"))
-        time.sleep(0.1)
+        for opt in [
+            "1. Combattre un ennemi",
+            "2. Affronter un boss (si disponible)",
+            "3. Affronter le SUPERBOSS",
+            "4. Voir inventaire",
+            "5. Voir quête active",
+            "6. Voir la carte",
+            "7. Voyager vers une autre région",
+            "8. Sauvegarder la progression",
+            "9. Quitter",
+            "10. Interagir avec les habitants (en devloppement)",
+        ]:
+            tprint(opt)
 
         choix = tinput("Tape un chiffre (1-10) : ").strip()
 
@@ -1463,28 +1267,23 @@ def launcher():
     except Exception:
         pass
 
-    print("\n" + "="*50)
-    time.sleep(0.1)
-    print(tr("BIENVENUE DANS RPG.txt"))
-    time.sleep(0.1)
-    print("="*50)
-    time.sleep(0.1)
-    
+    tprints(
+        "\n" + "="*50,
+        tr("BIENVENUE DANS RPG.txt"),
+        "="*50,
+    )
+
     sauvegardes = lister_sauvegardes()
-    
+
     if sauvegardes:
         print("\n1. Nouveau jeu")
-        time.sleep(0.1)
-        print("2. Charger une sauvegarde")
-        time.sleep(0.1)
+        tprint("2. Charger une sauvegarde")
         choix = tinput("Choisir (1 ou 2) : ").strip()
-        
+
         if choix == "2":
             print("\nSauvegardes disponibles:")
-            time.sleep(0.1)
             for i, save in enumerate(sauvegardes, 1):
                 print(f"  {i}. {save}")
-                time.sleep(0.1)
             try:
                 choix_save = int(tinput("Quelle sauvegarde charger? (numéro) : "))
                 if 1 <= choix_save <= len(sauvegardes):
@@ -1492,12 +1291,9 @@ def launcher():
                     if joueur:
                         menu_principal(joueur)
                     return
-                else:
-                    print(tr("Choix invalide!"))
-                    time.sleep(0.1)
+                tprint("Choix invalide!")
             except ValueError:
-                print(tr("Entrée invalide!"))
-                time.sleep(0.1)
+                tprint("Entrée invalide!")
     
     joueur = Personnage("Héros", 100, 15, 5, pv_max=100)
     joueur.loot("Or", 10)  # or de départ
@@ -1505,3 +1301,4 @@ def launcher():
 
 if __name__ == "__main__":
     launcher()
+#1292
