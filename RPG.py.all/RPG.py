@@ -23,16 +23,37 @@ TRANSLATIONS_EN = {
     "Tu as besoin de {quant} {item}(s) pour l'ouvrir.": "You need {quant} {item}(s) to open it.",
     "Tu en possèdes: {have}/{need}": "You have: {have}/{need}",
     "Tu utilises {quant} {item}(s) pour ouvrir la porte!": "You use {quant} {item}(s) to open the door!",
-    "  Tu voyages vers le {direction}...": "  You travel {direction}...",
+    "  Tu voyages vers le {direction}...": "  You travel to the {direction}...",
     "Bienvenue à {destination}!": "Welcome to {destination}!",
     "Sauvegarde créée: {name}": "Save created: {name}",
     "Sauvegarde '{name}' non trouvée!": "Save '{name}' not found!",
     "Veux-tu recommencer ? (oui/non) : ": "Do you want to restart? (yes/no): ",
     "Le jeu se fermera dans 5 secondes...": "The game will close in 5 seconds...",
+    "rejoignez-nous sur Discord pour plus de contenu et d'aide : {url}": "join us on Discord for more content and help: {url}",
+    "Il n'y a pas de chemin vers cette destination depuis ici.": "There is no path to that destination from here.",
+    "Rejoignez ma communauté sur Reddit : {url}": "Join my community on Reddit: {url}",
     "Choix invalide. Réponds par oui ou non.": "Invalid choice. Answer yes or no.",
+    "Choix invalide.": "Invalid choice.",
+    "Achat effectué!": "Purchase complete!",
+    "Quête : {name} | Objectif : {target} ({state})": "Quest: {name} | Objective: {target} ({state})",
+    "1. Nouveau jeu": "1. New game",
+    "2. Charger une sauvegarde": "2. Load save",
+    "1. Combattre un ennemi": "1. Fight an enemy",
+    "2. Affronter un boss (si disponible)": "2. Face a boss (if available)",
+    "3. Affronter le SUPERBOSS": "3. Face the SUPERBOSS",
+    "4. Voir inventaire": "4. View inventory",
+    "5. Voir quête active": "5. View active quest",
+    "6. Voir la carte": "6. View map",
+    "7. Voyager vers une autre région": "7. Travel to another region",
+    "8. Sauvegarder la progression": "8. Save progress",
+    "9. Quitter": "9. Quit",
+    "10. Interagir avec les habitants (en devloppement)": "10. Interact with the locals (in development)",
+    "Objet invalide ou indisponible.": "Invalid or unavailable item.",
+    "Action invalide, tu perds ton tour.": "Invalid action, you lose your turn.",
+    "le jeu se fermera dans 5 secondes...": "The game will close in 5 seconds...",
     "Un combat commence contre {enn} !": "A battle begins against {enn}!",
     "Choisis ton action (a=attaque, e=inventaire, d=dodge, u=objet, r=repos, f=fuite, end=fin) : ": "Choose your action (a=attack, e=inventory, d=dodge, u=item, r=rest, f=flee, end=quit): ",
-    "Inventaire :": "Inventory :",
+    "Inventaire :": "Inventory:",
     "=== MENU PRINCIPAL ===": "=== MAIN MENU ===",
     "Localisation: {loc}": "Location: {loc}",
     "Niveau: {lvl} | PV: {pv}/{pvmax} | ATK: {atk} | DEF: {defn} | XP: {cur}/{req}": "Level: {lvl} | HP: {pv}/{pvmax} | ATK: {atk} | DEF: {defn} | XP: {cur}/{req}",
@@ -55,20 +76,22 @@ TRANSLATIONS_EN = {
     "Fin de la partie.": "End of the game.",
     "BIENVENUE DANS RPG.txt": "WELCOME TO RPG.txt",
     "Choisir (1 ou 2) : ": "Choose (1 or 2): ",
+    "Choisir la langue / Choose language (fr/en) [fr]: ": "Choose language / Choisir la langue (fr/en) [fr]: ",
     "Sauvegardes disponibles:": "Available saves:",
     "Quelle sauvegarde charger? (numéro) : ": "Which save to load? (number): ",
+    "1. Nouveau jeu": "1. New game",
+    "2. Charger une sauvegarde": "2. Load save",
     "Merci d'avoir joué !": "Thanks for playing!",
     "Tu ne peux pas aller dans cette direction!": "You can't go that way!",
     "Choisir une destination (numéro) : ": "Choose a destination (number): ",
     "Choix invalide!": "Invalid choice!",
     "Entrée invalide!": "Invalid input!",
-    "10. Interagir avec les habitants (en devloppement)": "10. Interact with inhabitants (in development)",
-    "Tape un chiffre (1-10) : ": "Type a number (1-10): ",
+    "10. Interagir avec les habitants (en devloppement)": "10. Interact with the locals (in development)",
     "Aucun PNJ disponible ici!": "No NPCs available here!",
-    "Choisir un habitant (numéro) : ": "Choose an inhabitant (number): ",
+    "Choisir un habitant (numéro) : ": "Choose a villager (number): ",
     "Choisir un PNJ (numéro) : ": "Choose an NPC (number): ",
     # NPC Dialogues
-    "Bienvenue à la taverne! Que puis-je vous servir?": "Welcome to the tavern! What can I serve you?",
+    "Bienvenue à la taverne! Que puis-je vous servir?": "Welcome to the tavern! What can I get for you?",
     "1. Boire une bière (5 pièces d'or) - Restaure 10 PV": "1. Have a beer (5 gold) - Restores 10 HP",
     "2. Manger un peu de pain (5 pièces d'or) - Restaure 10 PV": "2. Eat some bread (5 gold) - Restores 10 HP",
     "3. Demander des informations sur la région": "3. Ask for information about the region",
@@ -76,14 +99,14 @@ TRANSLATIONS_EN = {
     "0. Partir": "0. Leave",
     "Vous vous sentez revigoré! +10 PV": "You feel refreshed! +10 HP",
     "Tu n'as pas assez d'or!": "You don't have enough gold!",
-    "Le vin vous revigore complètement! +25 PV": "The wine fully invigorates you! +25 HP",
-    "Le tavernier vous raconte des histoires sur les monstres des environs...": "The tavern keeper tells you stories about the monsters around...",
+    "Le vin vous revigore complètement! +25 PV": "The wine fully restores you! +25 HP",
+    "Le tavernier vous raconte des histoires sur les monstres des environs...": "The innkeeper tells you stories about the monsters nearby...",
     "- La forêt est infestée de plantes carnivores et de spectres": "- The forest is infested with carnivorous plants and specters",
-    "- Le château abrite des vampires et des sorciers corrompus": "- The castle houses vampires and corrupted sorcerers",
+    "- Le château abrite des vampires et des sorciers corrompus": "- The castle is home to vampires and corrupted sorcerers",
     "- Le marais maudit est le domaine du Roi du Marais": "- The cursed swamp is the domain of the Swamp King",
     "- Et attention au Tyran de Feu dans le volcan!": "- And beware the Fire Tyrant in the volcano!",
     "Tu as dormi à l'auberge : PV restaurés et sauvegarde automatique.": "You slept at the inn: HP restored and auto-saved.",
-    "{name} obtient : {item} x{qty} {stars}": "{name} obtains: {item} x{qty} {stars}",
+    "{name} obtient : {item} x{qty} {stars}": "{name} gains: {item} x{qty} {stars}",
     "Nouvelle quête : {quest} (objectif : {qty} {target})": "New quest: {quest} (objective: {qty} {target})",
     "Quête terminée : {name}": "Quest completed: {name}",
     "Votre choix : ": "Your choice: ",
@@ -94,11 +117,11 @@ TRANSLATIONS_EN = {
     "Vous avez acheté une potion!": "You bought a potion!",
     "Vous avez acheté un élixir!": "You bought an elixir!",
     "Vous avez acheté une potion de soin supérieure!": "You bought a superior healing potion!",
-    "Bonjour {player.name()}!": "Welcome!",
-    "Voici ce que j'ai en stock:": "Here's what I have in stock:",
+    "Bonjour {player.name()}!": "Hello, {player.name()}!",
+    "Voici ce que j'ai en stock:": "Here is what I have in stock:",
     "Prix: {price} or": "Price: {price} gold",
     "Que veux-tu acheter? (numéro ou 0 pour quitter) : ": "What do you want to buy? (number or 0 to quit): ",
-    "Achat effectué!": "Purchase made!",
+    "Achat effectué!": "Purchase complete!",
     "Objet invalide!": "Invalid item!",
     "Bienvenue chez le forgeron! J'améliore vos armes et armures.": "Welcome to the blacksmith! I improve your weapons and armor.",
     "1. Améliorer l'attaque (+2 ATK, 20 or)": "1. Improve attack (+2 ATK, 20 gold)",
@@ -130,6 +153,47 @@ TRANSLATIONS_EN = {
     "2. Histoire du monde": "2. History of the world",
     "Vous apprenez de nouvelles choses! +10 XP": "You learn new things! +10 XP",
     "Il y a longtemps, le monde était en paix... Mais les dragons ont apporté le chaos.": "Long ago, the world was at peace... But dragons brought chaos.",
+    "{name} gagne {amount} XP (total: {total}).": "{name} gains {amount} XP (total: {total}).",
+    "{name} monte au niveau {level} ! ATK+2, DEF+1, PVmax+10.": "{name} reaches level {level}! ATK +2, DEF +1, HP max +10.",
+    "Progression XP: {current}/{required} vers le niveau {next_level}.": "XP progress: {current}/{required} toward level {next_level}.",
+    "{name} souffre du poison (-3 PV).": "{name} suffers from poison (-3 HP).",
+    "{name} est brûlé (-2 PV).": "{name} is burned (-2 HP).",
+    "\n{name} : {hp}/{maxhp} PV | ATK {atk} | DEF {defn}": "\n{name} : {hp}/{maxhp} HP | ATK {atk} | DEF {defn}",
+    "{name} est étourdi et ne peut pas agir ce tour !": "{name} is stunned and cannot act this turn!",
+    "Choisis ton action (a=attaque, e=inventaire, d=dodge, u=objet, r=repos, f=fuite, end=fin) : ": "Choose your action (a=attack, e=inventory, d=dodge, u=item, r=rest, f=flee, end=quit): ",
+    "Fin de la partie.": "End of the game.",
+    "Inventaire :": "Inventory:",
+    "{name} tente d'esquiver...": "{name} tries to dodge...",
+    "Esquive réussie ! Aucun dégât subi ce tour.": "Dodge successful! No damage taken this turn.",
+    "Esquive ratée !": "Dodge failed!",
+    "Quel objet veux-tu utiliser ? ": "Which item do you want to use? ",
+    "{name} utilise une Potion (+20 PV).": "{name} uses a Potion (+20 HP).",
+    "{name} utilise un Élixir (+5 ATK).": "{name} uses an Elixir (+5 ATK).",
+    "Objet invalide ou indisponible.": "Invalid or unavailable item.",
+    "{name} se repose et récupère {heal} PV.": "{name} rests and recovers {heal} HP.",
+    "{name} réussit à fuir le combat !": "{name} successfully escapes the fight!",
+    "Fuite ratée !": "Escape failed!",
+    "Action invalide, tu perds ton tour.": "Invalid action, you lose your turn.",
+    "{name} mord {target}, inflige {damage} dégâts et récupère {heal} PV !": "{name} bites {target}, deals {damage} damage and recovers {heal} HP!",
+    "{name} devient intangible et évite d'attaquer frontalement ce tour.": "{name} becomes intangible and avoids attacking head-on this turn.",
+    "{name} empoisonne {target} ! Poison pendant 3 tours (dégâts subis: {damage}).": "{name} poisons {target}! Poison for 3 turns (damage taken: {damage}).",
+    "{name} brûle {target} ! Brûlure pendant 3 tours (dégâts subis: {damage}).": "{name} burns {target}! Burning for 3 turns (damage taken: {damage}).",
+    "{name} étourdit {target} ! Tu perdras ton prochain tour.": "{name} stuns {target}! You will lose your next turn.",
+    "{name} frappe brutalement, ignore une partie de la DEF et inflige {damage} dégâts.": "{name} strikes brutally, bypasses part of the DEF and deals {damage} damage.",
+    "{name} réussit une attaque critique !": "{name} lands a critical hit!",
+    "{name} attaque et inflige {damage} dégâts.": "{name} attacks and deals {damage} damage.",
+    "{name} charge avec rage et inflige {damage} dégâts !": "{name} charges with rage and deals {damage} damage!",
+    "{name} écrase et éclabousse : {damage}+{splash} dégâts.": "{name} crushes and splashes: {damage}+{splash} damage.",
+    "{name} lance un sort de feu : {damage} dégâts et brûlure (2 tours).": "{name} casts a fire spell: {damage} damage and burning (2 turns).",
+    "{name} gèle {target} : {damage} dégâts et étourdissement.": "{name} freezes {target}: {damage} damage and stun.",
+    "{name} invoque les ombres et inflige {damage} dégâts occultes.": "{name} summons shadows and deals {damage} occult damage.",
+    "{name} a vaincu {target} !": "{name} defeats {target}!",
+    "Victoire. . .": "Victory...",
+    "Victoire contre un Boss !": "Victory over a Boss!",
+    "Victoire contre un Mini-boss !": "Victory over a Mini-boss!",
+    "Victoire contre un ennemi classique.": "Victory over a regular enemy.",
+    "{name} a été vaincu par {target}...": "{name} has been defeated by {target}...",
+    "Héros": "Hero",
 }
 
 def tr(template, **kwargs):
@@ -177,13 +241,13 @@ def spend(joueur, montant):
     return True
 
 def service_menu(joueur, title, options):
-    tprint(title)
+    tprint(tr(title))
     for i, (label, action) in enumerate(options, 1):
-        tprint(f"{i}. {label}")
-    tprint("0. Partir")
-    choix = choose_int("Votre choix : ", 0, len(options))
+        tprint(f"{i}. {tr(label)}")
+    tprint(tr("0. Partir"))
+    choix = choose_int(tr("Votre choix : "), 0, len(options))
     if choix is None:
-        tprint("Entrée invalide!")
+        tprint(tr("Entrée invalide!"))
         return
     if choix == 0:
         return
@@ -191,6 +255,9 @@ def service_menu(joueur, title, options):
 
 # Traductions de noms (ennemis, objets, lieux, quêtes)
 NAME_TRANSLATIONS_EN = {
+    # Personnages / personnages
+    "Héros": "Hero",
+
     # Ennemis
     "Gobelin": "Goblin",
     "Plante carnivore": "Carnivorous Plant",
@@ -244,8 +311,11 @@ NAME_TRANSLATIONS_EN = {
 
     # Quêtes
     "Chasser les gobelins": "Hunt the Goblins",
+    "Trouver une piece d'or": "Find a Gold Piece",
     "Trouver un grimoire ancien": "Find an Ancient Grimoire",
+    "Vaincre le dragon ancien": "Defeat the Ancient Dragon",
     "Vaincre le Tyran de Feu": "Defeat the Fire Tyrant",
+    "Vaincre le Roi du Marais": "Defeat the Swamp King",
 
     # PNJs
     "Tavernier du village": "Village Tavern Keeper",
@@ -416,7 +486,7 @@ def voyager(joueur, destination):
 
     lieu_actuel = locations[joueur.localisation]
     if destination not in lieu_actuel["connections"]:
-        tprint("Il n'y a pas de chemin vers cette destination depuis ici.")
+        tprint(tr("Il n'y a pas de chemin vers cette destination depuis ici."))
         return False
 
     if locations[destination].get("locked"):
@@ -569,20 +639,20 @@ class Personnage:
     def attaquer(self, cible):
         degats = max(1, self.attaque - cible.defense)  # minimum 1 dégât
         cible.subir_degats(degats)
-        tprint("{name} attaque {target} et inflige {degats} dégâts.", name=self.nom, target=cible.nom, degats=degats)
+        tprint("{name} attaque {target} et inflige {degats} dégâts.", name=name_tr(self.nom), target=name_tr(cible.nom), degats=degats)
         time.sleep(0.1)
 
     def loot(self, objet, quantite=1):
         self.inventaire[objet] = self.inventaire.get(objet, 0) + quantite
         etoiles = raretes.get(objet, "")
-        tprint("{name} obtient : {item} x{qty} {stars}", name=self.nom, item=name_tr(objet), qty=quantite, stars=etoiles)
+        tprint("{name} obtient : {item} x{qty} {stars}", name=name_tr(self.nom), item=name_tr(objet), qty=quantite, stars=etoiles)
         time.sleep(0.1)
         verifier_quete(self, loot=objet)
 
     def gagner_xp(self, montant):
         # Ajoute l'XP et applique la courbe de leveling (peut monter plusieurs niveaux)
         self.xp += montant
-        print(f"{self.nom} gagne {montant} XP (total: {self.xp}).")
+        print(tr("{name} gagne {amount} XP (total: {total}).", name=name_tr(self.nom), amount=montant, total=self.xp))
         time.sleep(0.1)
 
         leveled = False
@@ -593,14 +663,14 @@ class Personnage:
             self.defense += 1
             self.pv_max += 10
             self.pv = self.pv_max
-            print(f"{self.nom} monte au niveau {self.niveau} ! ATK+2, DEF+1, PVmax+10.")
+            print(tr("{name} monte au niveau {level} ! ATK+2, DEF+1, PVmax+10.", name=name_tr(self.nom), level=self.niveau))
             time.sleep(0.1)
             leveled = True
 
         if not leveled:
             current_into_level = self.xp - total_xp_for_level(self.niveau)
             required = total_xp_for_level(self.niveau + 1) - total_xp_for_level(self.niveau)
-            print(f"Progression XP: {current_into_level}/{required} vers le niveau {self.niveau + 1}.")
+            print(tr("Progression XP: {current}/{required} vers le niveau {next_level}.", current=current_into_level, required=required, next_level=self.niveau + 1))
             time.sleep(0.1)
 
 # --- Quêtes ---
@@ -769,74 +839,74 @@ def combat(joueur, ennemi):
         if poison > 0:
             joueur.pv = max(0, joueur.pv - 3)
             poison -= 1
-            tprint(f"{joueur.nom} souffre du poison (-3 PV).")
+            tprint(tr("{name} souffre du poison (-3 PV).", name=name_tr(joueur.nom)))
         if brulure > 0:
             joueur.pv = max(0, joueur.pv - 2)
             brulure -= 1
-            tprint(f"{joueur.nom} est brûlé (-2 PV).")
+            tprint(tr("{name} est brûlé (-2 PV).", name=name_tr(joueur.nom)))
 
-        tprint(f"\n{joueur.nom} : {joueur.pv}/{joueur.pv_max} PV | ATK {joueur.attaque} | DEF {joueur.defense}")
-        tprint(f"{ennemi.nom} : {ennemi.pv}/{ennemi.pv_max} PV | ATK {ennemi.attaque} | DEF {ennemi.defense}")
+        tprint(tr("\n{name} : {hp}/{maxhp} PV | ATK {atk} | DEF {defn}", name=name_tr(joueur.nom), hp=joueur.pv, maxhp=joueur.pv_max, atk=joueur.attaque, defn=joueur.defense))
+        tprint(tr("\n{name} : {hp}/{maxhp} PV | ATK {atk} | DEF {defn}", name=name_tr(ennemi.nom), hp=ennemi.pv, maxhp=ennemi.pv_max, atk=ennemi.attaque, defn=ennemi.defense))
 
         # Tour du joueur
         if stun:
-            print(f"{joueur.nom} est étourdi et ne peut pas agir ce tour !")
+            print(tr("{name} est étourdi et ne peut pas agir ce tour !", name=name_tr(joueur.nom)))
             time.sleep(0.1)
             stun = False
         else:
-            action = tinput("Choisis ton action (a=attaque, e=inventaire, d=dodge, u=objet, r=repos, f=fuite, end=fin) : ").strip().lower()
+            action = tinput(tr("Choisis ton action (a=attaque, e=inventaire, d=dodge, u=objet, r=repos, f=fuite, end=fin) : ")).strip().lower()
             if action == "a":
                 joueur.attaquer(ennemi)
             elif action == "end":
-                print("Fin de la partie.")
+                print(tr("Fin de la partie."))
                 time.sleep(0.1)
                 sys.exit()
             elif action == "e":
-                print("Inventaire :", joueur.inventaire)
+                print(tr("Inventaire :"), joueur.inventaire)
                 time.sleep(0.1)
             elif action == "d":
-                print(f"{joueur.nom} tente d'esquiver...")
+                print(tr("{name} tente d'esquiver...", name=name_tr(joueur.nom)))
                 time.sleep(0.1)
                 if random.random() < 0.5:
-                    print("Esquive réussie ! Aucun dégât subi ce tour.")
+                    print(tr("Esquive réussie ! Aucun dégât subi ce tour."))
                     time.sleep(0.1)
                     # saute le tour de l'ennemi
                     continue
                 else:
-                    print("Esquive ratée !")
+                    print(tr("Esquive ratée !"))
                     time.sleep(0.1)
             elif action == "u":
-                print("Inventaire :", joueur.inventaire)
+                print(tr("Inventaire :"), joueur.inventaire)
                 time.sleep(0.1)
-                choix_objet = input("Quel objet veux-tu utiliser ? ").strip()
+                choix_objet = input(tr("Quel objet veux-tu utiliser ? ")).strip()
                 if choix_objet == "Potion" and joueur.inventaire.get("Potion", 0) > 0:
                     joueur.inventaire["Potion"] -= 1
                     joueur.pv = min(joueur.pv_max, joueur.pv + 20)
-                    print(f"{joueur.nom} utilise une Potion (+20 PV).")
+                    print(tr("{name} utilise une Potion (+20 PV).", name=name_tr(joueur.nom)))
                     time.sleep(0.1)
                 elif choix_objet == "Élixir" and joueur.inventaire.get("Élixir", 0) > 0:
                     joueur.inventaire["Élixir"] -= 1
                     joueur.attaque += 5
-                    print(f"{joueur.nom} utilise un Élixir (+5 ATK).")
+                    print(tr("{name} utilise un Élixir (+5 ATK).", name=name_tr(joueur.nom)))
                     time.sleep(0.1)
                 else:
-                    print("Objet invalide ou indisponible.")
+                    print(tr("Objet invalide ou indisponible."))
                     time.sleep(0.1)
             elif action == "r":
                 soin = random.randint(5, 10)
                 joueur.pv = min(joueur.pv_max, joueur.pv + soin)
-                print(f"{joueur.nom} se repose et récupère {soin} PV.")
+                print(tr("{name} se repose et récupère {heal} PV.", name=name_tr(joueur.nom), heal=soin))
                 time.sleep(0.1)
             elif action == "f":
                 if random.random() < 0.5:
-                    print(f"{joueur.nom} réussit à fuir le combat !")
+                    print(tr("{name} réussit à fuir le combat !", name=name_tr(joueur.nom)))
                     time.sleep(0.1)
                     return
                 else:
-                    print("Fuite ratée !")
+                    print(tr("Fuite ratée !"))
                     time.sleep(0.1)
             else:
-                print("Action invalide, tu perds ton tour.")
+                print(tr("Action invalide, tu perds ton tour."))
                 time.sleep(0.1)
 
         # Tour de l'ennemi
@@ -846,13 +916,13 @@ def combat(joueur, ennemi):
                 joueur.subir_degats(degats)
                 soin = degats // 2
                 ennemi.pv = min(ennemi.pv_max, ennemi.pv + soin)
-                print(f"{ennemi.nom} mord {joueur.nom}, inflige {degats} dégâts et récupère {soin} PV !")
+                print(tr("{name} mord {target}, inflige {damage} dégâts et récupère {heal} PV !", name=name_tr(ennemi.nom), target=name_tr(joueur.nom), damage=degats, heal=soin))
                 time.sleep(0.1)
 
             elif ennemi.nom == "Spectre":
                 # 20% de chance d'esquive sur ses propres tours (intangible)
                 if random.random() < 0.2:
-                    print(f"{ennemi.nom} devient intangible et évite d'attaquer frontalement ce tour.")
+                    print(tr("{name} devient intangible et évite d'attaquer frontalement ce tour.", name=name_tr(ennemi.nom)))
                     time.sleep(0.1)
                 else:
                     ennemi.attaquer(joueur)
@@ -861,20 +931,20 @@ def combat(joueur, ennemi):
                 degats = max(1, ennemi.attaque - joueur.defense)
                 joueur.subir_degats(degats)
                 poison = max(poison, 3)  # applique/rafraîchit 3 tours
-                print(f"{ennemi.nom} empoisonne {joueur.nom} ! Poison pendant 3 tours (dégâts subis: {degats}).")
+                print(tr("{name} empoisonne {target} ! Poison pendant 3 tours (dégâts subis: {damage}).", name=name_tr(ennemi.nom), target=name_tr(joueur.nom), damage=degats))
                 time.sleep(0.1)
 
             elif ennemi.nom == "Dragonnet":
                 degats = max(1, ennemi.attaque - joueur.defense)
                 joueur.subir_degats(degats)
                 brulure = max(brulure, 3)  # applique/rafraîchit 3 tours
-                print(f"{ennemi.nom} brûle {joueur.nom} ! Brûlure pendant 3 tours (dégâts subis: {degats}).")
+                print(tr("{name} brûle {target} ! Brûlure pendant 3 tours (dégâts subis: {damage}).", name=name_tr(ennemi.nom), target=name_tr(joueur.nom), damage=degats))
                 time.sleep(0.1)
 
             elif ennemi.nom == "Harpie":
                 if random.random() < 0.2:
                     stun = True
-                    print(f"{ennemi.nom} étourdit {joueur.nom} ! Tu perdras ton prochain tour.")
+                    print(tr("{name} étourdit {target} ! Tu perdras ton prochain tour.", name=name_tr(ennemi.nom), target=name_tr(joueur.nom)))
                     time.sleep(0.1)
                 else:
                     ennemi.attaquer(joueur)
@@ -883,17 +953,17 @@ def combat(joueur, ennemi):
                 # Ignore une partie de la DEF
                 degats = max(1, ennemi.attaque - (joueur.defense // 2))
                 joueur.subir_degats(degats)
-                print(f"{ennemi.nom} frappe brutalement, ignore une partie de la DEF et inflige {degats} dégâts.")
+                print(tr("{name} frappe brutalement, ignore une partie de la DEF et inflige {damage} dégâts.", name=name_tr(ennemi.nom), damage=degats))
                 time.sleep(0.1)
 
             elif ennemi.nom == "Bandit":
                 degats = max(1, ennemi.attaque - joueur.defense)
                 if random.random() < 0.2:
                     degats *= 2
-                    print(f"{ennemi.nom} réussit une attaque critique !")
+                    print(tr("{name} réussit une attaque critique !", name=name_tr(ennemi.nom)))
                     time.sleep(0.1)
                 joueur.subir_degats(degats)
-                print(f"{ennemi.nom} attaque et inflige {degats} dégâts.")
+                print(tr("{name} attaque et inflige {damage} dégâts.", name=name_tr(ennemi.nom), damage=degats))
                 time.sleep(0.1)
 
             elif ennemi.nom == "Minotaure":
@@ -901,7 +971,7 @@ def combat(joueur, ennemi):
                 if random.random() < 0.3:
                     degats = max(1, (ennemi.attaque + 5) - joueur.defense)
                     joueur.subir_degats(degats)
-                    print(f"{ennemi.nom} charge avec rage et inflige {degats} dégâts !")
+                    print(tr("{name} charge avec rage et inflige {damage} dégâts !", name=name_tr(ennemi.nom), damage=degats))
                     time.sleep(0.1)
                 else:
                     ennemi.attaquer(joueur)
@@ -911,7 +981,7 @@ def combat(joueur, ennemi):
                 degats = max(1, ennemi.attaque - joueur.defense)
                 splash = random.randint(0, 2)
                 joueur.subir_degats(degats + splash)
-                print(f"{ennemi.nom} écrase et éclabousse : {degats}+{splash} dégâts.")
+                print(tr("{name} écrase et éclabousse : {damage}+{splash} dégâts.", name=name_tr(ennemi.nom), damage=degats, splash=splash))
                 time.sleep(0.1)
 
             elif ennemi.nom == "Sorcier corrompu":
@@ -921,18 +991,18 @@ def combat(joueur, ennemi):
                     degats = max(1, ennemi.attaque - joueur.defense)
                     joueur.subir_degats(degats)
                     brulure = max(brulure, 2)
-                    print(f"{ennemi.nom} lance un sort de feu : {degats} dégâts et brûlure (2 tours).")
+                    print(tr("{name} lance un sort de feu : {damage} dégâts et brûlure (2 tours).", name=name_tr(ennemi.nom), damage=degats))
                     time.sleep(0.1)
                 elif sort == "glace":
                     degats = max(1, ennemi.attaque - joueur.defense - 2)
                     joueur.subir_degats(degats)
                     stun = True
-                    print(f"{ennemi.nom} gèle {joueur.nom} : {degats} dégâts et étourdissement.")
+                    print(tr("{name} gèle {target} : {damage} dégâts et étourdissement.", name=name_tr(ennemi.nom), target=name_tr(joueur.nom), damage=degats))
                     time.sleep(0.1)
                 else:
                     degats = max(2, ennemi.attaque - (joueur.defense // 3))
                     joueur.subir_degats(degats)
-                    print(f"{ennemi.nom} invoque les ombres et inflige {degats} dégâts occultes.")
+                    print(tr("{name} invoque les ombres et inflige {damage} dégâts occultes.", name=name_tr(ennemi.nom), damage=degats))
                     time.sleep(0.1)
 
             else:
@@ -941,7 +1011,7 @@ def combat(joueur, ennemi):
 
     # Fin du combat
     if joueur.est_vivant():
-        print(f"{joueur.nom} a vaincu {name_tr(ennemi.nom)} !")
+        print(tr("{name} a vaincu {target} !", name=name_tr(joueur.nom), target=name_tr(ennemi.nom)))
         time.sleep(0.1)
         verifier_quete(joueur, ennemi=ennemi)
 
@@ -949,13 +1019,13 @@ def combat(joueur, ennemi):
             joueur.gagner_xp(500)
             joueur.loot("Or", 100)
             joueur.loot("Clé Mystique", 0)  # pas de clé pour le superboss
-            print("Victoire. . .")
+            print(tr("Victoire. . ."))
             time.sleep(0.1)
         elif ennemi.nom in boss_names:
             joueur.gagner_xp(100)
             joueur.loot("Or", 50)
             joueur.loot("Clé Mystique", 1)  # 1 clé par boss régulier
-            print("Victoire contre un Boss !")
+            print(tr("Victoire contre un Boss !"))
             time.sleep(0.1)
         elif ennemi.nom in miniboss_names:
             # Récompenses de miniboss (entre ennemi classique et boss)
@@ -967,15 +1037,15 @@ def combat(joueur, ennemi):
                 joueur.loot(rare, 1)
             if random.random() < 0.12:
                 joueur.loot("Clé Mystique", 1)
-            print("Victoire contre un Mini-boss !")
+            print(tr("Victoire contre un Mini-boss !"))
             time.sleep(0.1)
         else:
             joueur.gagner_xp(20)
             joueur.loot("Or", 10)
-            print("Victoire contre un ennemi classique.")
+            print(tr("Victoire contre un ennemi classique."))
             time.sleep(0.1)
     else:
-        print(f"{joueur.nom} a été vaincu par {ennemi.nom}...")
+        print(tr("{name} a été vaincu par {target}...", name=name_tr(joueur.nom), target=name_tr(ennemi.nom)))
         time.sleep(0.1)
         time.sleep(2)
         print(tr("Fin de la partie."))
@@ -984,9 +1054,9 @@ def combat(joueur, ennemi):
         time.sleep(0.1)
         recommencer()
         reddit_url = "https://www.reddit.com/r/FreePython/"
-        print(f"Rejoignez ma communauté sur Reddit : {reddit_url}")
+        print(tr("Rejoignez ma communauté sur Reddit : {url}", url=reddit_url))
         time.sleep(0.1)
-        print("Le jeu se fermera dans 5 secondes...")
+        print(tr("Le jeu se fermera dans 5 secondes..."))
         time.sleep(0.1)
         time.sleep(5)
         sys.exit()
@@ -995,14 +1065,14 @@ def shop_handler(joueur, title, items):
     tprint(title)
     for i, (item, price) in enumerate(items, 1):
         tprint(f"{i}. {name_tr(item)} - {tr('Prix: {price} or', price=price)}")
-    choix = choose_int("Que veux-tu acheter? (numéro ou 0 pour quitter) : ", 0, len(items))
+    choix = choose_int(tr("Que veux-tu acheter? (numéro ou 0 pour quitter) : "), 0, len(items))
     if choix is None or choix == 0:
         return
     item, price = items[choix - 1]
     if not spend(joueur, price):
         return
     joueur.loot(item, 1)
-    tprint("Achat effectué!")
+    tprint(tr("Achat effectué!"))
 
 def interagir_avec_pnj(joueur, npc_nom):
     def drink_beer():
@@ -1178,23 +1248,23 @@ def menu_principal(joueur):
                 boss = Personnage(nom, pv, atk, defn)
                 combat(joueur, boss)
             else:
-                print("Aucun boss disponible ici!")
+                print(tr("Aucun boss disponible ici!"))
                 time.sleep(0.1)
         elif choix == "3":
             nom, pv, atk, defn = random.choice(superboss_possibles)
             superboss = Personnage(nom, pv, atk, defn)
             combat(joueur, superboss)
         elif choix == "4":
-            print("Inventaire :", joueur.inventaire)
+            print(tr("Inventaire :"), joueur.inventaire)
             time.sleep(0.1)
         elif choix == "5":
             if joueur.quete:
                 q = joueur.quete
                 etat = "terminée" if q.terminee else f"{q.progression}/{q.quantite}"
-                print(f"Quête : {name_tr(q.nom)} | Objectif : {name_tr(q.cible)} ({etat})")
+                print(tr("Quête : {name} | Objectif : {target} ({state})", name=name_tr(q.nom), target=name_tr(q.cible), state=etat))
                 time.sleep(0.1)
             else:
-                print("Aucune quête active.")
+                print(tr("Aucune quête active."))
                 time.sleep(0.1)
         elif choix == "6":
             afficher_carte(joueur)
@@ -1204,10 +1274,10 @@ def menu_principal(joueur):
             if lieu.get("connections"):
                 destinations = list(lieu["connections"].keys())
                 for i, dest in enumerate(destinations, 1):
-                    print(f"{i}. {dest}")
+                    print(f"{i}. {name_tr(dest)}")
                     time.sleep(0.1)
                 try:
-                    choix_voyage = int(tinput("Choisir une destination (numéro) : "))
+                    choix_voyage = int(tinput(tr("Choisir une destination (numéro) : ")))
                     if 1 <= choix_voyage <= len(destinations):
                         voyager(joueur, destinations[choix_voyage - 1])
                     else:
@@ -1225,11 +1295,10 @@ def menu_principal(joueur):
                 nom_save = "save"
             sauvegarder_jeu(joueur, nom_save)
         elif choix == "9":
-            print("Fin de la partie.")
+            print(tr("Fin de la partie."))
             time.sleep(0.1)
-            print("le jeu se fermera dans 5 secondes...")
-            time.sleep(0.1)
-            time.sleep(5)
+            print(tr("le jeu se fermera dans 5 secondes..."))
+            time.sleep(4)
             sys.exit()
         elif choix == "10":
             lieu = locations.get(joueur.localisation, {})
@@ -1239,7 +1308,7 @@ def menu_principal(joueur):
                     print(f"{i}. {name_tr(npc)}")
                     time.sleep(0.1)
                 try:
-                    choix_npc = int(tinput("Choisir un habitant (numéro) : "))
+                    choix_npc = int(tinput(tr("Choisir un habitant (numéro) : ")))
                     if 1 <= choix_npc <= len(npcs):
                         interagir_avec_pnj(joueur, npcs[choix_npc - 1])
                     else:
@@ -1252,7 +1321,7 @@ def menu_principal(joueur):
                 print(tr("Aucun PNJ disponible ici!"))
                 time.sleep(0.1)
         else:
-            print("Choix invalide.")
+            print(tr("Choix invalide."))
             time.sleep(0.1)
 
 # --- Lancement du jeu ---
@@ -1261,7 +1330,7 @@ def launcher():
     # Choix de la langue au lancement
     global LANG
     try:
-        lang_choice = input("Choisir la langue / Choose language (fr/en) [fr]: ").strip().lower()
+        lang_choice = input(tr("Choisir la langue / Choose language (fr/en) [fr]: ")).strip().lower()
         if lang_choice.startswith('en'):
             LANG = 'en'
     except Exception:
@@ -1276,24 +1345,24 @@ def launcher():
     sauvegardes = lister_sauvegardes()
 
     if sauvegardes:
-        print("\n1. Nouveau jeu")
-        tprint("2. Charger une sauvegarde")
-        choix = tinput("Choisir (1 ou 2) : ").strip()
+        print(tr("1. Nouveau jeu"))
+        print(tr("2. Charger une sauvegarde"))
+        choix = tinput(tr("Choisir (1 ou 2) : ")).strip()
 
         if choix == "2":
-            print("\nSauvegardes disponibles:")
+            print(tr("\nSauvegardes disponibles:"))
             for i, save in enumerate(sauvegardes, 1):
                 print(f"  {i}. {save}")
             try:
-                choix_save = int(tinput("Quelle sauvegarde charger? (numéro) : "))
+                choix_save = int(tinput(tr("Quelle sauvegarde charger? (numéro) : ")))
                 if 1 <= choix_save <= len(sauvegardes):
                     joueur = charger_jeu(sauvegardes[choix_save - 1])
                     if joueur:
                         menu_principal(joueur)
                     return
-                tprint("Choix invalide!")
+                tprint(tr("Choix invalide!"))
             except ValueError:
-                tprint("Entrée invalide!")
+                tprint(tr("Entrée invalide!"))
     
     joueur = Personnage("Héros", 100, 15, 5, pv_max=100)
     joueur.loot("Or", 10)  # or de départ
