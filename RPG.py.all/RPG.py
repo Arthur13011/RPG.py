@@ -181,6 +181,7 @@ TRANSLATIONS_EN = {
     "{name} étourdit {target} ! Tu perdras ton prochain tour.": "{name} stuns {target}! You will lose your next turn.",
     "{name} frappe brutalement, ignore une partie de la DEF et inflige {damage} dégâts.": "{name} strikes brutally, bypasses part of the DEF and deals {damage} damage.",
     "{name} réussit une attaque critique !": "{name} lands a critical hit!",
+    "{name} attaque {target} et inflige {degats} dégâts.": "{name} attacks {target} and deals {degats} damage.",
     "{name} attaque et inflige {damage} dégâts.": "{name} attacks and deals {damage} damage.",
     "{name} charge avec rage et inflige {damage} dégâts !": "{name} charges with rage and deals {damage} damage!",
     "{name} écrase et éclabousse : {damage}+{splash} dégâts.": "{name} crushes and splashes: {damage}+{splash} damage.",
@@ -213,7 +214,7 @@ def tr(template, **kwargs):
 def tprint(template, **kwargs):
     """Print a translated template."""
     print(tr(template, **kwargs))
-    time.sleep(0.1)
+    time.sleep(0.05)
 
 def tinput(prompt, **kwargs):
     """Input with translated prompt."""
@@ -457,7 +458,7 @@ def afficher_carte(joueur):
 
     for ligne in grille:
         print(''.join(ligne))
-        time.sleep(0.1)
+        time.sleep(0.05)
 
     tprints(
         "\n" + "-"*60,
@@ -640,20 +641,20 @@ class Personnage:
         degats = max(1, self.attaque - cible.defense)  # minimum 1 dégât
         cible.subir_degats(degats)
         tprint("{name} attaque {target} et inflige {degats} dégâts.", name=name_tr(self.nom), target=name_tr(cible.nom), degats=degats)
-        time.sleep(0.1)
+        time.sleep(0.05)
 
     def loot(self, objet, quantite=1):
         self.inventaire[objet] = self.inventaire.get(objet, 0) + quantite
         etoiles = raretes.get(objet, "")
         tprint("{name} obtient : {item} x{qty} {stars}", name=name_tr(self.nom), item=name_tr(objet), qty=quantite, stars=etoiles)
-        time.sleep(0.1)
+        time.sleep(0.05)
         verifier_quete(self, loot=objet)
 
     def gagner_xp(self, montant):
         # Ajoute l'XP et applique la courbe de leveling (peut monter plusieurs niveaux)
         self.xp += montant
         print(tr("{name} gagne {amount} XP (total: {total}).", name=name_tr(self.nom), amount=montant, total=self.xp))
-        time.sleep(0.1)
+        time.sleep(0.05)
 
         leveled = False
         # Tant que l'XP totale dépasse le palier du niveau suivant, on monte
@@ -664,14 +665,14 @@ class Personnage:
             self.pv_max += 10
             self.pv = self.pv_max
             print(tr("{name} monte au niveau {level} ! ATK+2, DEF+1, PVmax+10.", name=name_tr(self.nom), level=self.niveau))
-            time.sleep(0.1)
+            time.sleep(0.05)
             leveled = True
 
         if not leveled:
             current_into_level = self.xp - total_xp_for_level(self.niveau)
             required = total_xp_for_level(self.niveau + 1) - total_xp_for_level(self.niveau)
             print(tr("Progression XP: {current}/{required} vers le niveau {next_level}.", current=current_into_level, required=required, next_level=self.niveau + 1))
-            time.sleep(0.1)
+            time.sleep(0.05)
 
 # --- Quêtes ---
 quetes_possibles = [
@@ -698,7 +699,7 @@ class Quete:
         if self.progression >= self.quantite:
             self.terminee = True
             tprint("Quête terminée : {name}", name=self.nom)
-            time.sleep(0.1)
+            time.sleep(0.05)
             return self.recompense
         return None
 
@@ -851,7 +852,7 @@ def combat(joueur, ennemi):
         # Tour du joueur
         if stun:
             print(tr("{name} est étourdi et ne peut pas agir ce tour !", name=name_tr(joueur.nom)))
-            time.sleep(0.1)
+            time.sleep(0.05)
             stun = False
         else:
             action = tinput(tr("Choisis ton action (a=attaque, e=inventaire, d=dodge, u=objet, r=repos, f=fuite, end=fin) : ")).strip().lower()
@@ -859,55 +860,55 @@ def combat(joueur, ennemi):
                 joueur.attaquer(ennemi)
             elif action == "end":
                 print(tr("Fin de la partie."))
-                time.sleep(0.1)
+                time.sleep(0.05)
                 sys.exit()
             elif action == "e":
                 print(tr("Inventaire :"), joueur.inventaire)
-                time.sleep(0.1)
+                time.sleep(0.05)
             elif action == "d":
                 print(tr("{name} tente d'esquiver...", name=name_tr(joueur.nom)))
-                time.sleep(0.1)
+                time.sleep(0.05)
                 if random.random() < 0.5:
                     print(tr("Esquive réussie ! Aucun dégât subi ce tour."))
-                    time.sleep(0.1)
+                    time.sleep(0.05)
                     # saute le tour de l'ennemi
                     continue
                 else:
                     print(tr("Esquive ratée !"))
-                    time.sleep(0.1)
+                    time.sleep(0.05)
             elif action == "u":
                 print(tr("Inventaire :"), joueur.inventaire)
-                time.sleep(0.1)
+                time.sleep(0.05)
                 choix_objet = input(tr("Quel objet veux-tu utiliser ? ")).strip()
                 if choix_objet == "Potion" and joueur.inventaire.get("Potion", 0) > 0:
                     joueur.inventaire["Potion"] -= 1
                     joueur.pv = min(joueur.pv_max, joueur.pv + 20)
                     print(tr("{name} utilise une Potion (+20 PV).", name=name_tr(joueur.nom)))
-                    time.sleep(0.1)
+                    time.sleep(0.05)
                 elif choix_objet == "Élixir" and joueur.inventaire.get("Élixir", 0) > 0:
                     joueur.inventaire["Élixir"] -= 1
                     joueur.attaque += 5
                     print(tr("{name} utilise un Élixir (+5 ATK).", name=name_tr(joueur.nom)))
-                    time.sleep(0.1)
+                    time.sleep(0.05)
                 else:
                     print(tr("Objet invalide ou indisponible."))
-                    time.sleep(0.1)
+                    time.sleep(0.05)
             elif action == "r":
                 soin = random.randint(5, 10)
                 joueur.pv = min(joueur.pv_max, joueur.pv + soin)
                 print(tr("{name} se repose et récupère {heal} PV.", name=name_tr(joueur.nom), heal=soin))
-                time.sleep(0.1)
+                time.sleep(0.05)
             elif action == "f":
                 if random.random() < 0.5:
                     print(tr("{name} réussit à fuir le combat !", name=name_tr(joueur.nom)))
-                    time.sleep(0.1)
+                    time.sleep(0.05)
                     return
                 else:
                     print(tr("Fuite ratée !"))
-                    time.sleep(0.1)
+                    time.sleep(0.05)
             else:
                 print(tr("Action invalide, tu perds ton tour."))
-                time.sleep(0.1)
+                time.sleep(0.05)
 
         # Tour de l'ennemi
         if ennemi.est_vivant():
@@ -917,13 +918,13 @@ def combat(joueur, ennemi):
                 soin = degats // 2
                 ennemi.pv = min(ennemi.pv_max, ennemi.pv + soin)
                 print(tr("{name} mord {target}, inflige {damage} dégâts et récupère {heal} PV !", name=name_tr(ennemi.nom), target=name_tr(joueur.nom), damage=degats, heal=soin))
-                time.sleep(0.1)
+                time.sleep(0.05)
 
             elif ennemi.nom == "Spectre":
                 # 20% de chance d'esquive sur ses propres tours (intangible)
                 if random.random() < 0.2:
                     print(tr("{name} devient intangible et évite d'attaquer frontalement ce tour.", name=name_tr(ennemi.nom)))
-                    time.sleep(0.1)
+                    time.sleep(0.05)
                 else:
                     ennemi.attaquer(joueur)
 
@@ -932,20 +933,20 @@ def combat(joueur, ennemi):
                 joueur.subir_degats(degats)
                 poison = max(poison, 3)  # applique/rafraîchit 3 tours
                 print(tr("{name} empoisonne {target} ! Poison pendant 3 tours (dégâts subis: {damage}).", name=name_tr(ennemi.nom), target=name_tr(joueur.nom), damage=degats))
-                time.sleep(0.1)
+                time.sleep(0.05)
 
             elif ennemi.nom == "Dragonnet":
                 degats = max(1, ennemi.attaque - joueur.defense)
                 joueur.subir_degats(degats)
                 brulure = max(brulure, 3)  # applique/rafraîchit 3 tours
                 print(tr("{name} brûle {target} ! Brûlure pendant 3 tours (dégâts subis: {damage}).", name=name_tr(ennemi.nom), target=name_tr(joueur.nom), damage=degats))
-                time.sleep(0.1)
+                time.sleep(0.05)
 
             elif ennemi.nom == "Harpie":
                 if random.random() < 0.2:
                     stun = True
                     print(tr("{name} étourdit {target} ! Tu perdras ton prochain tour.", name=name_tr(ennemi.nom), target=name_tr(joueur.nom)))
-                    time.sleep(0.1)
+                    time.sleep(0.05)
                 else:
                     ennemi.attaquer(joueur)
 
@@ -954,17 +955,17 @@ def combat(joueur, ennemi):
                 degats = max(1, ennemi.attaque - (joueur.defense // 2))
                 joueur.subir_degats(degats)
                 print(tr("{name} frappe brutalement, ignore une partie de la DEF et inflige {damage} dégâts.", name=name_tr(ennemi.nom), damage=degats))
-                time.sleep(0.1)
+                time.sleep(0.05)
 
             elif ennemi.nom == "Bandit":
                 degats = max(1, ennemi.attaque - joueur.defense)
                 if random.random() < 0.2:
                     degats *= 2
                     print(tr("{name} réussit une attaque critique !", name=name_tr(ennemi.nom)))
-                    time.sleep(0.1)
+                    time.sleep(0.05)
                 joueur.subir_degats(degats)
                 print(tr("{name} attaque et inflige {damage} dégâts.", name=name_tr(ennemi.nom), damage=degats))
-                time.sleep(0.1)
+                time.sleep(0.05)
 
             elif ennemi.nom == "Minotaure":
                 # Charge puissante mais se fatigue (-2 ATK pendant 2 tours simulés via message, pas de buff persistant ici)
@@ -972,7 +973,7 @@ def combat(joueur, ennemi):
                     degats = max(1, (ennemi.attaque + 5) - joueur.defense)
                     joueur.subir_degats(degats)
                     print(tr("{name} charge avec rage et inflige {damage} dégâts !", name=name_tr(ennemi.nom), damage=degats))
-                    time.sleep(0.1)
+                    time.sleep(0.05)
                 else:
                     ennemi.attaquer(joueur)
 
@@ -982,7 +983,7 @@ def combat(joueur, ennemi):
                 splash = random.randint(0, 2)
                 joueur.subir_degats(degats + splash)
                 print(tr("{name} écrase et éclabousse : {damage}+{splash} dégâts.", name=name_tr(ennemi.nom), damage=degats, splash=splash))
-                time.sleep(0.1)
+                time.sleep(0.05)
 
             elif ennemi.nom == "Sorcier corrompu":
                 # Sort aléatoire: feu (brulure), glace (stun), ombre (dégâts bruts)
@@ -992,18 +993,18 @@ def combat(joueur, ennemi):
                     joueur.subir_degats(degats)
                     brulure = max(brulure, 2)
                     print(tr("{name} lance un sort de feu : {damage} dégâts et brûlure (2 tours).", name=name_tr(ennemi.nom), damage=degats))
-                    time.sleep(0.1)
+                    time.sleep(0.05)
                 elif sort == "glace":
                     degats = max(1, ennemi.attaque - joueur.defense - 2)
                     joueur.subir_degats(degats)
                     stun = True
                     print(tr("{name} gèle {target} : {damage} dégâts et étourdissement.", name=name_tr(ennemi.nom), target=name_tr(joueur.nom), damage=degats))
-                    time.sleep(0.1)
+                    time.sleep(0.05)
                 else:
                     degats = max(2, ennemi.attaque - (joueur.defense // 3))
                     joueur.subir_degats(degats)
                     print(tr("{name} invoque les ombres et inflige {damage} dégâts occultes.", name=name_tr(ennemi.nom), damage=degats))
-                    time.sleep(0.1)
+                    time.sleep(0.05)
 
             else:
                 # Gobelin, Squelette, etc. comportement par défaut
@@ -1012,7 +1013,7 @@ def combat(joueur, ennemi):
     # Fin du combat
     if joueur.est_vivant():
         print(tr("{name} a vaincu {target} !", name=name_tr(joueur.nom), target=name_tr(ennemi.nom)))
-        time.sleep(0.1)
+        time.sleep(0.05)
         verifier_quete(joueur, ennemi=ennemi)
 
         if ennemi.nom in superboss_names:
@@ -1020,13 +1021,13 @@ def combat(joueur, ennemi):
             joueur.loot("Or", 100)
             joueur.loot("Clé Mystique", 0)  # pas de clé pour le superboss
             print(tr("Victoire. . ."))
-            time.sleep(0.1)
+            time.sleep(0.05)
         elif ennemi.nom in boss_names:
             joueur.gagner_xp(100)
             joueur.loot("Or", 50)
             joueur.loot("Clé Mystique", 1)  # 1 clé par boss régulier
             print(tr("Victoire contre un Boss !"))
-            time.sleep(0.1)
+            time.sleep(0.05)
         elif ennemi.nom in miniboss_names:
             # Récompenses de miniboss (entre ennemi classique et boss)
             joueur.gagner_xp(60)
@@ -1038,26 +1039,26 @@ def combat(joueur, ennemi):
             if random.random() < 0.12:
                 joueur.loot("Clé Mystique", 1)
             print(tr("Victoire contre un Mini-boss !"))
-            time.sleep(0.1)
+            time.sleep(0.05)
         else:
             joueur.gagner_xp(20)
             joueur.loot("Or", 10)
             print(tr("Victoire contre un ennemi classique."))
-            time.sleep(0.1)
+            time.sleep(0.05)
     else:
         print(tr("{name} a été vaincu par {target}...", name=name_tr(joueur.nom), target=name_tr(ennemi.nom)))
-        time.sleep(0.1)
+        time.sleep(0.05)
         time.sleep(2)
         print(tr("Fin de la partie."))
-        time.sleep(0.1)
+        time.sleep(0.05)
         print(tr("Merci d'avoir joué !"))
-        time.sleep(0.1)
+        time.sleep(0.05)
         recommencer()
         reddit_url = "https://www.reddit.com/r/FreePython/"
         print(tr("Rejoignez ma communauté sur Reddit : {url}", url=reddit_url))
-        time.sleep(0.1)
+        time.sleep(0.05)
         print(tr("Le jeu se fermera dans 5 secondes..."))
-        time.sleep(0.1)
+        time.sleep(0.05)
         time.sleep(5)
         sys.exit()
 
@@ -1207,15 +1208,15 @@ def menu_principal(joueur):
     afficher_carte(joueur)  # affiche la carte au démarrage
     while joueur.est_vivant():
         print("\n" + tr("=== MENU PRINCIPAL ==="))
-        time.sleep(0.1)
+        time.sleep(0.05)
         print(tr("Localisation: {loc}", loc=joueur.localisation))
-        time.sleep(0.1)
+        time.sleep(0.05)
         current_into_level = joueur.xp - total_xp_for_level(joueur.niveau)
         required = total_xp_for_level(joueur.niveau + 1) - total_xp_for_level(joueur.niveau)
         print(tr("Niveau: {lvl} | PV: {pv}/{pvmax} | ATK: {atk} | DEF: {defn} | XP: {cur}/{req}", lvl=joueur.niveau, pv=joueur.pv, pvmax=joueur.pv_max, atk=joueur.attaque, defn=joueur.defense, cur=current_into_level, req=required))
-        time.sleep(0.1)
+        time.sleep(0.05)
         print()
-        time.sleep(0.1)
+        time.sleep(0.05)
         for opt in [
             "1. Combattre un ennemi",
             "2. Affronter un boss (si disponible)",
@@ -1232,6 +1233,11 @@ def menu_principal(joueur):
 
         choix = tinput("Tape un chiffre (1-10) : ").strip()
 
+        choix_normalise = "".join(choix.casefold().split())
+        if choix_normalise in {"anumber(1-10)", "anumber(1-10))"}:
+            print("Haha very funny")
+            continue
+
         if choix == "1":
             # Combat location-based (spawn aléatoire depuis la liste de la localisation)
             ennemi = spawn_enemy_for_location(joueur)
@@ -1239,7 +1245,7 @@ def menu_principal(joueur):
                 combat(joueur, ennemi)
             else:
                 print(tr("Aucun ennemi disponible ici!"))
-                time.sleep(0.1)
+                time.sleep(0.05)
         elif choix == "2":
             # Boss fight location-based
             lieu = locations.get(joueur.localisation, {})
@@ -1249,23 +1255,23 @@ def menu_principal(joueur):
                 combat(joueur, boss)
             else:
                 print(tr("Aucun boss disponible ici!"))
-                time.sleep(0.1)
+                time.sleep(0.05)
         elif choix == "3":
             nom, pv, atk, defn = random.choice(superboss_possibles)
             superboss = Personnage(nom, pv, atk, defn)
             combat(joueur, superboss)
         elif choix == "4":
             print(tr("Inventaire :"), joueur.inventaire)
-            time.sleep(0.1)
+            time.sleep(0.05)
         elif choix == "5":
             if joueur.quete:
                 q = joueur.quete
                 etat = "terminée" if q.terminee else f"{q.progression}/{q.quantite}"
                 print(tr("Quête : {name} | Objectif : {target} ({state})", name=name_tr(q.nom), target=name_tr(q.cible), state=etat))
-                time.sleep(0.1)
+                time.sleep(0.05)
             else:
                 print(tr("Aucune quête active."))
-                time.sleep(0.1)
+                time.sleep(0.05)
         elif choix == "6":
             afficher_carte(joueur)
         elif choix == "7":
@@ -1275,20 +1281,20 @@ def menu_principal(joueur):
                 destinations = list(lieu["connections"].keys())
                 for i, dest in enumerate(destinations, 1):
                     print(f"{i}. {name_tr(dest)}")
-                    time.sleep(0.1)
+                    time.sleep(0.05)
                 try:
                     choix_voyage = int(tinput(tr("Choisir une destination (numéro) : ")))
                     if 1 <= choix_voyage <= len(destinations):
                         voyager(joueur, destinations[choix_voyage - 1])
                     else:
                         print(tr("Choix invalide!"))
-                        time.sleep(0.1)
+                        time.sleep(0.05)
                 except (ValueError, IndexError):
                     print(tr("Entrée invalide!"))
-                    time.sleep(0.1)
+                    time.sleep(0.05)
             else:
                 print(tr("Aucune destination accessible!"))
-                time.sleep(0.1)
+                time.sleep(0.05)
         elif choix == "8":
             nom_save = tinput("Nom de la sauvegarde (défaut: 'save') : ").strip()
             if not nom_save:
@@ -1296,7 +1302,7 @@ def menu_principal(joueur):
             sauvegarder_jeu(joueur, nom_save)
         elif choix == "9":
             print(tr("Fin de la partie."))
-            time.sleep(0.1)
+            time.sleep(0.05)
             print(tr("le jeu se fermera dans 5 secondes..."))
             time.sleep(4)
             sys.exit()
@@ -1306,23 +1312,23 @@ def menu_principal(joueur):
                 npcs = lieu["npcs"]
                 for i, npc in enumerate(npcs, 1):
                     print(f"{i}. {name_tr(npc)}")
-                    time.sleep(0.1)
+                    time.sleep(0.05)
                 try:
                     choix_npc = int(tinput(tr("Choisir un habitant (numéro) : ")))
                     if 1 <= choix_npc <= len(npcs):
                         interagir_avec_pnj(joueur, npcs[choix_npc - 1])
                     else:
                         print(tr("Choix invalide!"))
-                        time.sleep(0.1)
+                        time.sleep(0.05)
                 except (ValueError, IndexError):
                     print(tr("Entrée invalide!"))
-                    time.sleep(0.1)
+                    time.sleep(0.05)
             else:
                 print(tr("Aucun PNJ disponible ici!"))
-                time.sleep(0.1)
+                time.sleep(0.05)
         else:
             print(tr("Choix invalide."))
-            time.sleep(0.1)
+            time.sleep(0.05)
 
 # --- Lancement du jeu ---
 def launcher():
