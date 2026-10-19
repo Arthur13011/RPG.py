@@ -66,7 +66,18 @@ TRANSLATIONS_EN = {
     "7. Voyager vers une autre région": "7. Travel to another region",
     "8. Sauvegarder la progression": "8. Save progress",
     "9. Quitter": "9. Quit",
-    "Tape un chiffre (1-10) : ": "Type a number (1-10): ",
+    "Tape un chiffre (1-11) : ": "Type a number (1-11): ",
+    "11. Fabriquer un objet": "11. Craft an item",
+    "Que veux-tu fabriquer ?": "What would you like to craft?",
+    "Fabriquer un arc (3 ficelles)": "Craft a bow (3 String)",
+    "Fabriquer une dague (3 barres d'acier, 1 lanière de cuir, 1 marteau)": "Craft a dagger (3 Steel Rods, 1 Leather Strap, 1 Hammer)",
+    "Pas assez de ficelle pour fabriquer un arc (3 requis).": "Not enough string to craft a bow (3 required).",
+    "Arc fabriqué ! Il inflige +5 dégâts.": "Bow crafted! It adds +5 damage.",
+    "Il faut 3 barres d'acier, 1 lanière de cuir et 1 marteau pour fabriquer une dague.": "You need 3 Steel Rods, 1 Leather Strap, and 1 Hammer to craft a dagger.",
+    "Dague fabriquée ! Elle inflige +2 dégâts. Le marteau est rendu.": "Dagger crafted! It adds +2 damage. The Hammer is returned.",
+    "Fabriquer une épée longue (10 barres d'acier, 2 lanières de cuir, 1 marteau, 1 joyau du Dragon)": "Craft a longsword (10 Steel Rods, 2 Leather Straps, 1 Hammer, 1 Dragon Jewel)",
+    "Il faut 10 barres d'acier, 2 lanières de cuir, 1 marteau et 1 joyau du Dragon.": "You need 10 Steel Rods, 2 Leather Straps, 1 Hammer, and 1 Dragon Jewel.",
+    "Épée longue fabriquée ! Elle inflige +7 dégâts. Le marteau est rendu.": "Longsword crafted! It adds +7 damage. The Hammer is returned.",
     "Choix invalide": "Invalid choice",
     "Aucun ennemi disponible ici!": "No enemy available here!",
     "Aucun boss disponible ici!": "No boss available here!",
@@ -299,6 +310,16 @@ NAME_TRANSLATIONS_EN = {
     "Écaille du Dragon Ancien": "Ancient Dragon Scale",
     "Clé Mystique": "Mystic Key",
     "Or": "Gold",
+    "Bâton": "Stick",
+    "Dague": "Dagger",
+    "Ficelle": "String",
+    "Arc": "Bow",
+    "Barre d'acier": "Steel Rod",
+    "Lanière de cuir": "Leather Strap",
+    "Marteau": "Hammer",
+    "Joyau du Dragon": "Dragon Jewel",
+    "Épée longue": "Longsword",
+    "Dragon enflammé": "Flaming Dragon",
 
     # Lieux
     "Village": "Village",
@@ -390,7 +411,7 @@ locations = {
     "Volcan de Feu": {
         "description": "Un volcan actif rempli de lave et de cratères! ",
         "ennemis": ["Dragonnet", "Sorcier corrompu", "Golem de pierre", "Minotaure"],
-        "boss": ("Tyran de Feu", 140, 26, 10,"Dragon enflammé", 150, 25, 11),
+        "boss": (("Tyran de Feu", 140, 26, 10), ("Dragon enflammé", 150, 25, 11)),
         "connections": {"Marais Maudit": "ouest"},
         "locked": False
     },
@@ -525,6 +546,7 @@ def sauvegarder_jeu(joueur, nom_sauvegarde="save"):
         "xp": joueur.xp,
         "niveau": joueur.niveau,
         "localisation": joueur.localisation,
+        "defeated_bosses": joueur.defeated_bosses,
         "quete": {
             "nom": joueur.quete.nom if joueur.quete else None,
             "progression": joueur.quete.progression if joueur.quete else 0,
@@ -554,6 +576,7 @@ def charger_jeu(nom_sauvegarde="save"):
     joueur.xp = donnees["xp"]
     joueur.niveau = donnees["niveau"]
     joueur.localisation = donnees["localisation"]
+    joueur.defeated_bosses = donnees.get("defeated_bosses", [])
     
     # Recréer la quête si elle existe
     if donnees["quete"]["nom"]:
@@ -597,7 +620,45 @@ raretes = {
     "Couronne des Ombres": "★★★",
     "Écaille du Dragon Ancien": "★★★",
     "Clé Mystique": "",
+    "Bâton": "",
+    "Dague": "★",
+    "Ficelle": "",
+    "Arc": "★★",
+    "Barre d'acier": "",
+    "Lanière de cuir": "",
+    "Marteau": "",
+    "Joyau du Dragon": "★★★",
+    "Épée longue": "★★★",
     "Or": ""
+}
+
+ENEMY_LOOT_TABLES = {
+    "Gobelin": (("Potion", 0.25), ("Dague", 0.20), ("Lanière de cuir", 0.10)),
+    "Plante carnivore": (("Potion", 0.20),),
+    "Squelette": (("Potion", 0.15), ("Élixir", 0.05), ("Marteau", 0.05)),
+    "Dragonnet": (("Élixir", 0.25),),
+    "Bandit": (("Potion", 0.20), ("Lanière de cuir", 0.20), ("Barre d'acier", 0.15)),
+    "Slime géant": (("Potion", 0.20)),
+    "Spectre": (("Élixir", 0.20),),
+    "Minotaure": (("Élixir", 0.25),),
+    "Harpie": (("Potion", 0.15),),
+    "Golem de pierre": (("Bouclier", 0.12), ("Épée magique", 0.08)),
+    "Vampire": (("Potion", 0.15), ("Élixir", 0.15)),
+    "Sorcier corrompu": (("Élixir", 0.20), ("Grimoire ancien", 0.05)),
+    "Chef Bandit": (("Épée magique", 0.10),),
+    "Esprit Ancien": (("Grimoire ancien", 0.10),),
+    "Garde Souterrain": (("Bouclier", 0.10),),
+    "Capitaine Noir": (("Épée magique", 0.10),),
+    "Traqueur du Marais": (("Amulette de Vie", 0.10),),
+    "Géant de Magma": (("Écaille du Dragon Ancien", 0.10),),
+    "Magicien Maudit": (("Grimoire ancien", 0.10),),
+    "Reine Araignée": (("Anneau de Force", 0.15), ("Ficelle", 0.50)),
+    "Dragon Ancien": (("Écaille du Dragon Ancien", 0.20),),
+    "Tyran de Feu": (("Écaille du Dragon Ancien", 0.25),),
+    "Dragon enflammé": (("Joyau du Dragon", 1.0),),
+    "Seigneur des Ombres": (("Couronne des Ombres", 0.15),),
+    "Roi du Marais": (("Amulette de Vie", 0.20),),
+    "Le Sorcier Immortel": (("Couronne des Ombres", 0.50),),
 }
 
 # --- Classe Personnage ---
@@ -611,7 +672,7 @@ def total_xp_for_level(level):
     return int(40 * (level - 1)**2.2)
 
 class Personnage:
-    __slots__ = ('nom', 'pv_max', 'pv', 'attaque', 'defense', 'inventaire', 'xp', 'niveau', 'quete', 'localisation', 'last_spawned_enemy')
+    __slots__ = ('nom', 'pv_max', 'pv', 'attaque', 'defense', 'inventaire', 'xp', 'niveau', 'quete', 'localisation', 'last_spawned_enemy', 'loot_table', 'defeated_bosses')
     def __init__(self, nom, pv, attaque, defense, pv_max=None):
         self.nom = nom
         self.pv_max = pv if pv_max is None else pv_max
@@ -625,6 +686,9 @@ class Personnage:
         self.localisation = "Village"  # position sur la carte
         # évite de faire apparaître le même ennemi deux fois de suite
         self.last_spawned_enemy = None
+        self.defeated_bosses = []
+        base_name = nom.partition(" (Élite)")[0]
+        self.loot_table = ENEMY_LOOT_TABLES.get(base_name, ())
 
     def est_vivant(self):
         return self.pv > 0
@@ -638,7 +702,12 @@ class Personnage:
             self.pv = 0
 
     def attaquer(self, cible):
-        degats = max(1, self.attaque - cible.defense)  # minimum 1 dégât
+        bonus_arme = max(
+            2 if self.inventaire.get("Dague", 0) > 0 else 0,
+            5 if self.inventaire.get("Arc", 0) > 0 else 0,
+            7 if self.inventaire.get("Épée longue", 0) > 0 else 0,
+        )
+        degats = max(1, self.attaque + bonus_arme - cible.defense)  # minimum 1 dégât
         cible.subir_degats(degats)
         tprint("{name} attaque {target} et inflige {degats} dégâts.", name=name_tr(self.nom), target=name_tr(cible.nom), degats=degats)
         time.sleep(0.05)
@@ -736,7 +805,8 @@ boss_possibles = [
     ("Dragon Ancien", 120, 25, 8),
     ("Seigneur des Ombres", 100, 20, 10),
     ("Reine Araignée", 100, 15, 7),
-    ("Tyran de Feu", 140, 26, 10)
+    ("Tyran de Feu", 140, 26, 10),
+    ("Dragon enflammé", 150, 25, 11)
 ]
 # Precompute name sets for fast membership checks (avoids allocating small lists repeatedly)
 boss_names = {b[0] for b in boss_possibles}
@@ -1015,22 +1085,26 @@ def combat(joueur, ennemi):
         print(tr("{name} a vaincu {target} !", name=name_tr(joueur.nom), target=name_tr(ennemi.nom)))
         time.sleep(0.05)
         verifier_quete(joueur, ennemi=ennemi)
+        if ennemi.nom in boss_names or ennemi.nom in superboss_names:
+            if ennemi.nom not in joueur.defeated_bosses:
+                joueur.defeated_bosses.append(ennemi.nom)
+        bonus_xp = ennemi.pv_max // 10
 
         if ennemi.nom in superboss_names:
-            joueur.gagner_xp(500)
+            joueur.gagner_xp(500 + bonus_xp)
             joueur.loot("Or", 100)
             joueur.loot("Clé Mystique", 0)  # pas de clé pour le superboss
             print(tr("Victoire. . ."))
             time.sleep(0.05)
         elif ennemi.nom in boss_names:
-            joueur.gagner_xp(100)
+            joueur.gagner_xp(100 + bonus_xp)
             joueur.loot("Or", 50)
             joueur.loot("Clé Mystique", 1)  # 1 clé par boss régulier
             print(tr("Victoire contre un Boss !"))
             time.sleep(0.05)
         elif ennemi.nom in miniboss_names:
             # Récompenses de miniboss (entre ennemi classique et boss)
-            joueur.gagner_xp(60)
+            joueur.gagner_xp(60 + bonus_xp)
             joueur.loot("Or", 30)
             # petite chance de drop rare / clé
             if random.random() < 0.20:
@@ -1041,10 +1115,14 @@ def combat(joueur, ennemi):
             print(tr("Victoire contre un Mini-boss !"))
             time.sleep(0.05)
         else:
-            joueur.gagner_xp(20)
+            joueur.gagner_xp(20 + bonus_xp)
             joueur.loot("Or", 10)
             print(tr("Victoire contre un ennemi classique."))
             time.sleep(0.05)
+
+        for item, drop_chance in ennemi.loot_table:
+            if random.random() < drop_chance:
+                joueur.loot(item, 1)
     else:
         print(tr("{name} a été vaincu par {target}...", name=name_tr(joueur.nom), target=name_tr(ennemi.nom)))
         time.sleep(0.05)
@@ -1202,6 +1280,53 @@ def interagir_avec_pnj(joueur, npc_nom):
     else:
         tprint("Choix invalide.")
 
+def fabriquer_arc(joueur):
+    ficelles_requises = 3
+    if joueur.inventaire.get("Ficelle", 0) < ficelles_requises:
+        tprint("Pas assez de ficelle pour fabriquer un arc (3 requis).")
+        return
+
+    joueur.inventaire["Ficelle"] -= ficelles_requises
+    joueur.loot("Arc", 1)
+    tprint("Arc fabriqué ! Il inflige +5 dégâts.")
+
+def fabriquer_dague(joueur):
+    if (
+        joueur.inventaire.get("Barre d'acier", 0) < 3
+        or joueur.inventaire.get("Lanière de cuir", 0) < 1
+        or joueur.inventaire.get("Marteau", 0) < 1
+    ):
+        tprint("Il faut 3 barres d'acier, 1 lanière de cuir et 1 marteau pour fabriquer une dague.")
+        return
+
+    joueur.inventaire["Barre d'acier"] -= 3
+    joueur.inventaire["Lanière de cuir"] -= 1
+    joueur.loot("Dague", 1)
+    tprint("Dague fabriquée ! Elle inflige +2 dégâts. Le marteau est rendu.")
+
+def fabriquer_epee_longue(joueur):
+    if (
+        joueur.inventaire.get("Barre d'acier", 0) < 10
+        or joueur.inventaire.get("Lanière de cuir", 0) < 2
+        or joueur.inventaire.get("Marteau", 0) < 1
+        or joueur.inventaire.get("Joyau du Dragon", 0) < 1
+    ):
+        tprint("Il faut 10 barres d'acier, 2 lanières de cuir, 1 marteau et 1 joyau du Dragon.")
+        return
+
+    joueur.inventaire["Barre d'acier"] -= 10
+    joueur.inventaire["Lanière de cuir"] -= 2
+    joueur.inventaire["Joyau du Dragon"] -= 1
+    joueur.loot("Épée longue", 1)
+    tprint("Épée longue fabriquée ! Elle inflige +7 dégâts. Le marteau est rendu.")
+
+def menu_fabrication(joueur):
+    service_menu(joueur, "Que veux-tu fabriquer ?", [
+        ("Fabriquer un arc (3 ficelles)", lambda: fabriquer_arc(joueur)),
+        ("Fabriquer une dague (3 barres d'acier, 1 lanière de cuir, 1 marteau)", lambda: fabriquer_dague(joueur)),
+        ("Fabriquer une épée longue (10 barres d'acier, 2 lanières de cuir, 1 marteau, 1 joyau du Dragon)", lambda: fabriquer_epee_longue(joueur)),
+    ])
+
 # --- Menu principal ---
 def menu_principal(joueur):
     donner_quete(joueur)  # donne une quête au début
@@ -1228,10 +1353,11 @@ def menu_principal(joueur):
             "8. Sauvegarder la progression",
             "9. Quitter",
             "10. Interagir avec les habitants (en devloppement)",
+            "11. Fabriquer un objet",
         ]:
             tprint(opt)
 
-        choix = tinput("Tape un chiffre (1-10) : ").strip()
+        choix = tinput("Tape un chiffre (1-11) : ").strip()
 
         choix_normalise = "".join(choix.casefold().split())
         if choix_normalise in {"anumber(1-10)", "anumber(1-10))"}:
@@ -1249,17 +1375,30 @@ def menu_principal(joueur):
         elif choix == "2":
             # Boss fight location-based
             lieu = locations.get(joueur.localisation, {})
-            if lieu.get("boss"):
-                nom, pv, atk, defn = lieu["boss"]
-                boss = Personnage(nom, pv, atk, defn)
-                combat(joueur, boss)
+            boss_options = lieu.get("boss")
+            if boss_options:
+                if isinstance(boss_options[0], str):
+                    boss_options = (boss_options,)
+                available_bosses = [boss for boss in boss_options if boss[0] not in joueur.defeated_bosses]
+                if available_bosses:
+                    nom, pv, atk, defn = random.choice(available_bosses)
+                    boss = Personnage(nom, pv, atk, defn)
+                    combat(joueur, boss)
+                else:
+                    print(tr("Aucun boss disponible ici!"))
+                    time.sleep(0.05)
             else:
                 print(tr("Aucun boss disponible ici!"))
                 time.sleep(0.05)
         elif choix == "3":
-            nom, pv, atk, defn = random.choice(superboss_possibles)
-            superboss = Personnage(nom, pv, atk, defn)
-            combat(joueur, superboss)
+            available_superbosses = [boss for boss in superboss_possibles if boss[0] not in joueur.defeated_bosses]
+            if available_superbosses:
+                nom, pv, atk, defn = random.choice(available_superbosses)
+                superboss = Personnage(nom, pv, atk, defn)
+                combat(joueur, superboss)
+            else:
+                print(tr("Aucun boss disponible ici!"))
+                time.sleep(0.05)
         elif choix == "4":
             print(tr("Inventaire :"), joueur.inventaire)
             time.sleep(0.05)
@@ -1326,6 +1465,8 @@ def menu_principal(joueur):
             else:
                 print(tr("Aucun PNJ disponible ici!"))
                 time.sleep(0.05)
+        elif choix == "11":
+            menu_fabrication(joueur)
         else:
             print(tr("Choix invalide."))
             time.sleep(0.05)
@@ -1372,8 +1513,9 @@ def launcher():
     
     joueur = Personnage("Héros", 100, 15, 5, pv_max=100)
     joueur.loot("Or", 10)  # or de départ
+    joueur.loot("Bâton", 1)
     menu_principal(joueur)
 
 if __name__ == "__main__":
     launcher()
-#1292
+#1521
