@@ -67,6 +67,7 @@ TRANSLATIONS_EN = {
     "8. Sauvegarder la progression": "8. Save progress",
     "9. Quitter": "9. Quit",
     "Tape un chiffre (1-11) : ": "Type a number (1-11): ",
+    "Tape un chiffre (1-12) : ": "Type a number (1-12): ",
     "11. Fabriquer un objet": "11. Craft an item",
     "12. Voir les succès": "12. View achievements",
     "=== SUCCÈS ===": "=== ACHIEVEMENTS ===",
@@ -86,6 +87,19 @@ TRANSLATIONS_EN = {
     "Fabrique ton premier objet.": "Craft your first item.",
     "Archer": "Archer",
     "Tire une flèche avec un arc.": "Shoot an arrow with a Bow.",
+    "Haha very funny": "Haha, very funny.",
+    "\n{loc}": "\n{loc}",
+    "\n   Connexions:": "\n   Connections:",
+    "     • {dest} ({dir}){locked}": "     • {dest} ({dir}){locked}",
+    "\nCette porte est verrouillée!": "\nThis door is locked!",
+    "\nTu utilises {quant} {item}(s) pour ouvrir la porte!": "\nYou use {quant} {item}(s) to open the door!",
+    "\n  Tu voyages vers le {direction}...": "\n  You travel to the {direction}...",
+    "nord": "north",
+    "sud": "south",
+    "est": "east",
+    "ouest": "west",
+    " [Verrouillé]": " [LOCKED]",
+    "Sauvegarde chargée: {name}": "Save loaded: {name}",
     "Que veux-tu fabriquer ?": "What would you like to craft?",
     "Fabriquer un arc (3 ficelles)": "Craft a bow (3 String)",
     "Fabriquer une dague (3 barres d'acier, 1 lanière de cuir, 1 marteau)": "Craft a dagger (3 Steel Rods, 1 Leather Strap, 1 Hammer)",
@@ -111,6 +125,7 @@ TRANSLATIONS_EN = {
     "Choisir (1 ou 2) : ": "Choose (1 or 2): ",
     "Choisir la langue / Choose language (fr/en) [fr]: ": "Choose language / Choisir la langue (fr/en) [fr]: ",
     "Sauvegardes disponibles:": "Available saves:",
+    "\nSauvegardes disponibles:": "\nAvailable saves:",
     "Quelle sauvegarde charger? (numéro) : ": "Which save to load? (number): ",
     "1. Nouveau jeu": "1. New game",
     "2. Charger une sauvegarde": "2. Load save",
@@ -143,6 +158,21 @@ TRANSLATIONS_EN = {
     "Nouvelle quête : {quest} (objectif : {qty} {target})": "New quest: {quest} (objective: {qty} {target})",
     "Quête terminée : {name}": "Quest completed: {name}",
     "Votre choix : ": "Your choice: ",
+    "Boire une bière (5 pièces d'or) - Restaure 10 PV": "Have a beer (5 gold) - Restores 10 HP",
+    "Manger un peu de pain (5 pièces d'or) - Restaure 10 PV": "Eat some bread (5 gold) - Restores 10 HP",
+    "Demander des informations sur la région": "Ask for information about the region",
+    "Dormir à l'auberge (100% PV, sauvegarde auto)": "Sleep at the inn (100% HP, auto-save)",
+    "Bienvenue chez le marchand! Voici ce que j'ai en stock:": "Welcome to the merchant! Here's what I have in stock:",
+    "Améliorer l'attaque (+2 ATK, 20 or)": "Improve attack (+2 ATK, 20 gold)",
+    "Améliorer la défense (+1 DEF, 15 or)": "Improve defense (+1 DEF, 15 gold)",
+    "Dormir (restaure 50% PV, 10 or)": "Sleep (restores 50% HP, 10 gold)",
+    "Dormir complètement (100% PV, 20 or)": "Sleep fully (100% HP, 20 gold)",
+    "Conseil sur la quête (+ indice)": "Quest advice (+ hint)",
+    "Bénédiction (+5 PV max temporaire, 30 or)": "Blessing (+5 temporary max HP, 30 gold)",
+    "Vendre un objet volé (double prix)": "Sell a stolen item (double price)",
+    "Quête secondaire : Voler un objet (récompense 50 or)": "Side quest: Steal an item (50 gold reward)",
+    "Acheter un livre de sagesse (+10 XP, 25 or)": "Buy a book of wisdom (+10 XP, 25 gold)",
+    "Histoire du monde": "World history",
     "Bienvenue chez l'apothicaire! J'ai les meilleures potions de la région.": "Welcome to the apothecary! I have the best potions in the region.",
     "1. Acheter une potion (5 pièces d'or)": "1. Buy a potion (5 gold)",
     "2. Acheter un élixir (15 pièces d'or)": "2. Buy an elixir (15 gold)",
@@ -321,6 +351,7 @@ NAME_TRANSLATIONS_EN = {
 
     # Objets
     "Potion": "Potion",
+    "Potion supérieure": "Superior Potion",
     "Élixir": "Elixir",
     "Épée magique": "Magic Sword",
     "Bouclier": "Shield",
@@ -521,8 +552,8 @@ def afficher_carte(joueur):
         tprint(f"   {desc_tr(lieu['description'])}")
         tprint(tr("\n   Connexions:"))
         for destination, direction in lieu["connections"].items():
-            locked_str = " [LOCKED]" if locations[destination].get("locked") else ""
-            tprint("     • {dest} ({dir}){locked}", dest=name_tr(destination), dir=direction, locked=locked_str)
+            locked_str = tr(" [Verrouillé]") if locations[destination].get("locked") else ""
+            tprint("     • {dest} ({dir}){locked}", dest=name_tr(destination), dir=tr(direction), locked=locked_str)
     tprint("="*60 + "\n")
 
 def voyager(joueur, destination):
@@ -549,7 +580,7 @@ def voyager(joueur, destination):
     direction = lieu_actuel["connections"][destination]
     joueur.localisation = destination
     joueur.last_spawned_enemy = None
-    tprint("\n  Tu voyages vers le {direction}...", direction=direction)
+    tprint("\n  Tu voyages vers le {direction}...", direction=tr(direction))
     tprint("Bienvenue à {destination}!", destination=destination)
     afficher_carte(joueur)
     return True
@@ -612,7 +643,7 @@ def charger_jeu(nom_sauvegarde="save"):
             joueur.quete.progression = donnees["quete"]["progression"]
             joueur.quete.terminee = donnees["quete"]["terminee"]
     
-    tprint(f"Sauvegarde chargée: {nom_sauvegarde}")
+    tprint("Sauvegarde chargée: {name}", name=nom_sauvegarde)
     return joueur
 
 def lister_sauvegardes():
@@ -1481,7 +1512,7 @@ def menu_principal(joueur):
 
         choix_normalise = "".join(choix.casefold().split())
         if choix_normalise in {"anumber(1-10)", "anumber(1-10))"}:
-            print("Haha very funny")
+            print(tr("Haha very funny"))
             continue
 
         if choix == "1":
@@ -1640,4 +1671,4 @@ def launcher():
 
 if __name__ == "__main__":
     launcher()
-#1643
+#1674
