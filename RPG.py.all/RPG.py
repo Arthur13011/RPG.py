@@ -1,10 +1,9 @@
 # Licensed under CC BY-ND 4.0
-# You may use and share this code, but you may not modify it.
+# You may use and share this code, but you may not market it as your own.
 
 # -*- coding: utf-8 -*-
 import random
 import sys
-import webbrowser
 import time
 import json
 import os
@@ -1671,4 +1670,4 @@ def launcher():
 
 if __name__ == "__main__":
     launcher()
-#1674
+#1643
