@@ -78,6 +78,10 @@ TRANSLATIONS_EN = {
     "Fabriquer une épée longue (10 barres d'acier, 2 lanières de cuir, 1 marteau, 1 joyau du Dragon)": "Craft a longsword (10 Steel Rods, 2 Leather Straps, 1 Hammer, 1 Dragon Jewel)",
     "Il faut 10 barres d'acier, 2 lanières de cuir, 1 marteau et 1 joyau du Dragon.": "You need 10 Steel Rods, 2 Leather Straps, 1 Hammer, and 1 Dragon Jewel.",
     "Épée longue fabriquée ! Elle inflige +7 dégâts. Le marteau est rendu.": "Longsword crafted! It adds +7 damage. The Hammer is returned.",
+    "Fabriquer {item} ({ingredients})": "Craft {item} ({ingredients})",
+    "Il manque des matériaux pour fabriquer {item}.": "Not enough materials to craft {item}.",
+    "{item} fabriqué ! Bonus de dégâts : +{damage}.": "{item} crafted! Damage bonus: +{damage}.",
+    "Il ne te reste plus de flèches pour tirer avec l'arc.": "You have no arrows left to shoot the bow.",
     "Choix invalide": "Invalid choice",
     "Aucun ennemi disponible ici!": "No enemy available here!",
     "Aucun boss disponible ici!": "No boss available here!",
@@ -292,7 +296,7 @@ NAME_TRANSLATIONS_EN = {
     "Chef Bandit": "Bandit Chief",
     "Esprit Ancien": "Ancient Spirit",
     "Garde Souterrain": "Underground Guard",
-    "Capitaine Noir": "Black Captain",
+    "Capitaine Noir": "Dark Captain",
     "Traqueur du Marais": "Swamp Stalker",
     "Géant de Magma": "Magma Giant",
     "Magicien Maudit": "Cursed Mage",
@@ -313,6 +317,8 @@ NAME_TRANSLATIONS_EN = {
     "Bâton": "Stick",
     "Dague": "Dagger",
     "Ficelle": "String",
+    "Flèche": "Arrow",
+    "Bout d'acier": "Steel Tip",
     "Arc": "Bow",
     "Barre d'acier": "Steel Rod",
     "Lanière de cuir": "Leather Strap",
@@ -629,13 +635,63 @@ raretes = {
     "Marteau": "",
     "Joyau du Dragon": "★★★",
     "Épée longue": "★★★",
-    "Or": ""
+    "Flèche": "",
+    "Bout d'acier": "",
+    "Or": "",
 }
+
+CRAFTING_RECIPES = {
+    "bow_recipe": {"Ficelle": 3},
+    "dagger_recipe": {"Barre d'acier": 3, "Lanière de cuir": 1, "Marteau": 1},
+    "longsword_recipe": {
+        "Barre d'acier": 10,
+        "Lanière de cuir": 2,
+        "Marteau": 1,
+        "Joyau du Dragon": 1,
+    },
+    "arrow_recipe": {"Bout d'acier": 1, "Ficelle": 1},
+    "metal_bit_recipe": {"Barre d'acier": 1, "Marteau": 1},
+}
+
+ITEM_DATA = {
+    item: {"canCraftItem": False, "canCraftWith": None, "damageBonus": 0, "craftQuantity": 1}
+    for item in raretes
+}
+ITEM_DATA.update({
+    "Arc": {
+        "canCraftItem": True,
+        "canCraftWith": "bow_recipe",
+        "damageBonus": 5,
+    },
+    "Dague": {
+        "canCraftItem": True,
+        "canCraftWith": "dagger_recipe",
+        "damageBonus": 2,
+    },
+    "Épée longue": {
+        "canCraftItem": True,
+        "canCraftWith": "longsword_recipe",
+        "damageBonus": 7,
+    },
+    "Flèche": {
+        "canCraftItem": True,
+        "canCraftWith": "arrow_recipe",
+        "damageBonus": 0,
+    },
+    "Bout d'acier": {
+        "canCraftItem": True,
+        "canCraftWith": "metal_bit_recipe",
+        "damageBonus": 0,
+        "craftQuantity": 60,
+    },
+
+})
+REUSABLE_CRAFTING_TOOLS = {"Marteau"}
 
 ENEMY_LOOT_TABLES = {
     "Gobelin": (("Potion", 0.25), ("Dague", 0.20), ("Lanière de cuir", 0.10)),
     "Plante carnivore": (("Potion", 0.20),),
-    "Squelette": (("Potion", 0.15), ("Élixir", 0.05), ("Marteau", 0.05)),
+    "Squelette": (("Potion", 0.15), ("Élixir", 0.05), ("Marteau", 0.05), ("Flèche", 0.40), ("Bout d'acier", 0.20)),
     "Dragonnet": (("Élixir", 0.25),),
     "Bandit": (("Potion", 0.20), ("Lanière de cuir", 0.20), ("Barre d'acier", 0.15)),
     "Slime géant": (("Potion", 0.20)),
@@ -702,11 +758,18 @@ class Personnage:
             self.pv = 0
 
     def attaquer(self, cible):
-        bonus_arme = max(
-            2 if self.inventaire.get("Dague", 0) > 0 else 0,
-            5 if self.inventaire.get("Arc", 0) > 0 else 0,
-            7 if self.inventaire.get("Épée longue", 0) > 0 else 0,
-        )
+        armes_possedees = [
+            (item, item_data["damageBonus"])
+            for item, item_data in ITEM_DATA.items()
+            if item_data["damageBonus"] > 0 and self.inventaire.get(item, 0) > 0
+        ]
+        arme, bonus_arme = max(armes_possedees, key=lambda entry: entry[1], default=(None, 0))
+        if arme == "Arc":
+            if self.inventaire.get("Flèche", 0) < 1:
+                tprint(tr("Il ne te reste plus de flèches pour tirer avec l'arc."))
+                return
+            self.inventaire["Flèche"] -= 1
+
         degats = max(1, self.attaque + bonus_arme - cible.defense)  # minimum 1 dégât
         cible.subir_degats(degats)
         tprint("{name} attaque {target} et inflige {degats} dégâts.", name=name_tr(self.nom), target=name_tr(cible.nom), degats=degats)
@@ -843,679 +906,3 @@ minibosses_by_location = {
     "Volcan de Feu": ("Géant de Magma", 130, 22, 11, 0.05),
     "Tour Interdite": ("Magicien Maudit", 95, 20, 9, 0.05)
 }
-
-# Jeu rapide : set pour détection dans les récompenses
-miniboss_names = {v[0] for v in minibosses_by_location.values()}
-
-def spawn_enemy_for_location(joueur):
-    """Choisit aléatoirement un ennemi disponible dans la localisation du joueur,
-    applique une petite variation aléatoire aux stats, peut générer une variante 'Élite'
-    et, si la localisation a un miniboss, peut faire apparaître ce miniboss.
-    Évite de renvoyer le même type d'ennemi deux fois de suite si possible."""
-    lieu = locations.get(joueur.localisation, {})
-
-    # 1) Vérifier miniboss lié à la zone (petite chance)
-    mb = minibosses_by_location.get(joueur.localisation)
-    if mb and random.random() < mb[4]:
-        name, base_hp, base_atk, base_def, _chance = mb
-        hp = max(1, int(base_hp * random.uniform(0.95, 1.10)))
-        atk = max(1, int(base_atk * random.uniform(0.95, 1.05)))
-        defn = max(0, int(base_def * random.uniform(0.95, 1.05)))
-        # marquer comme dernier spawn pour éviter répétitions immédiates
-        joueur.last_spawned_enemy = name
-        return Personnage(name, hp, atk, defn)
-
-    # 2) Spawn normal (location-based)
-    noms_locaux = lieu.get("ennemis", [])
-    templates = [e for e in ennemis_possibles if e[0] in noms_locaux]
-    if not templates:
-        return None
-
-    # Si possible, exclure le dernier ennemi apparu pour éviter les répétitions
-    base_names = [t[0] for t in templates]
-    candidates = templates
-    if joueur and getattr(joueur, 'last_spawned_enemy', None) in base_names and len(templates) > 1:
-        candidates = [t for t in templates if t[0] != joueur.last_spawned_enemy]
-
-    nom, base_hp, base_atk, base_def = random.choice(candidates)
-
-    # Variation aléatoire des stats (+/-)
-    hp = max(1, int(base_hp * random.uniform(0.9, 1.2)))
-    atk = max(1, int(base_atk * random.uniform(0.9, 1.15)))
-    defn = max(0, int(base_def * random.uniform(0.9, 1.15)))
-
-    # Petite chance d'ennemi 'Élite' (boost de stats)
-    is_elite = False
-    if random.random() < 0.10:
-        is_elite = True
-        hp = int(hp * 1.35)
-        atk = int(atk * 1.25)
-        defn = int(defn * 1.2)
-
-    # Conserver le nom de base pour le suivi (sans suffixe Elite)
-    joueur.last_spawned_enemy = nom
-    final_name = f"{nom} (Élite)" if is_elite else nom
-    return Personnage(final_name, hp, atk, defn)
-
-# --- Combat ---
-def combat(joueur, ennemi):
-    poison = 0    # -3 PV par tour pendant N tours
-    brulure = 0   # -2 PV par tour pendant N tours
-    stun = False  # saute le tour du joueur
-
-    tprint(tr("Un combat commence contre {enn} !", enn=name_tr(ennemi.nom)))
-
-    while joueur.est_vivant() and ennemi.est_vivant():
-        # Statuts persistants
-        if poison > 0:
-            joueur.pv = max(0, joueur.pv - 3)
-            poison -= 1
-            tprint(tr("{name} souffre du poison (-3 PV).", name=name_tr(joueur.nom)))
-        if brulure > 0:
-            joueur.pv = max(0, joueur.pv - 2)
-            brulure -= 1
-            tprint(tr("{name} est brûlé (-2 PV).", name=name_tr(joueur.nom)))
-
-        tprint(tr("\n{name} : {hp}/{maxhp} PV | ATK {atk} | DEF {defn}", name=name_tr(joueur.nom), hp=joueur.pv, maxhp=joueur.pv_max, atk=joueur.attaque, defn=joueur.defense))
-        tprint(tr("\n{name} : {hp}/{maxhp} PV | ATK {atk} | DEF {defn}", name=name_tr(ennemi.nom), hp=ennemi.pv, maxhp=ennemi.pv_max, atk=ennemi.attaque, defn=ennemi.defense))
-
-        # Tour du joueur
-        if stun:
-            print(tr("{name} est étourdi et ne peut pas agir ce tour !", name=name_tr(joueur.nom)))
-            time.sleep(0.05)
-            stun = False
-        else:
-            action = tinput(tr("Choisis ton action (a=attaque, e=inventaire, d=dodge, u=objet, r=repos, f=fuite, end=fin) : ")).strip().lower()
-            if action == "a":
-                joueur.attaquer(ennemi)
-            elif action == "end":
-                print(tr("Fin de la partie."))
-                time.sleep(0.05)
-                sys.exit()
-            elif action == "e":
-                print(tr("Inventaire :"), joueur.inventaire)
-                time.sleep(0.05)
-            elif action == "d":
-                print(tr("{name} tente d'esquiver...", name=name_tr(joueur.nom)))
-                time.sleep(0.05)
-                if random.random() < 0.5:
-                    print(tr("Esquive réussie ! Aucun dégât subi ce tour."))
-                    time.sleep(0.05)
-                    # saute le tour de l'ennemi
-                    continue
-                else:
-                    print(tr("Esquive ratée !"))
-                    time.sleep(0.05)
-            elif action == "u":
-                print(tr("Inventaire :"), joueur.inventaire)
-                time.sleep(0.05)
-                choix_objet = input(tr("Quel objet veux-tu utiliser ? ")).strip()
-                if choix_objet == "Potion" and joueur.inventaire.get("Potion", 0) > 0:
-                    joueur.inventaire["Potion"] -= 1
-                    joueur.pv = min(joueur.pv_max, joueur.pv + 20)
-                    print(tr("{name} utilise une Potion (+20 PV).", name=name_tr(joueur.nom)))
-                    time.sleep(0.05)
-                elif choix_objet == "Élixir" and joueur.inventaire.get("Élixir", 0) > 0:
-                    joueur.inventaire["Élixir"] -= 1
-                    joueur.attaque += 5
-                    print(tr("{name} utilise un Élixir (+5 ATK).", name=name_tr(joueur.nom)))
-                    time.sleep(0.05)
-                else:
-                    print(tr("Objet invalide ou indisponible."))
-                    time.sleep(0.05)
-            elif action == "r":
-                soin = random.randint(5, 10)
-                joueur.pv = min(joueur.pv_max, joueur.pv + soin)
-                print(tr("{name} se repose et récupère {heal} PV.", name=name_tr(joueur.nom), heal=soin))
-                time.sleep(0.05)
-            elif action == "f":
-                if random.random() < 0.5:
-                    print(tr("{name} réussit à fuir le combat !", name=name_tr(joueur.nom)))
-                    time.sleep(0.05)
-                    return
-                else:
-                    print(tr("Fuite ratée !"))
-                    time.sleep(0.05)
-            else:
-                print(tr("Action invalide, tu perds ton tour."))
-                time.sleep(0.05)
-
-        # Tour de l'ennemi
-        if ennemi.est_vivant():
-            if ennemi.nom == "Vampire":
-                degats = max(1, ennemi.attaque - joueur.defense)
-                joueur.subir_degats(degats)
-                soin = degats // 2
-                ennemi.pv = min(ennemi.pv_max, ennemi.pv + soin)
-                print(tr("{name} mord {target}, inflige {damage} dégâts et récupère {heal} PV !", name=name_tr(ennemi.nom), target=name_tr(joueur.nom), damage=degats, heal=soin))
-                time.sleep(0.05)
-
-            elif ennemi.nom == "Spectre":
-                # 20% de chance d'esquive sur ses propres tours (intangible)
-                if random.random() < 0.2:
-                    print(tr("{name} devient intangible et évite d'attaquer frontalement ce tour.", name=name_tr(ennemi.nom)))
-                    time.sleep(0.05)
-                else:
-                    ennemi.attaquer(joueur)
-
-            elif ennemi.nom == "Plante carnivore":
-                degats = max(1, ennemi.attaque - joueur.defense)
-                joueur.subir_degats(degats)
-                poison = max(poison, 3)  # applique/rafraîchit 3 tours
-                print(tr("{name} empoisonne {target} ! Poison pendant 3 tours (dégâts subis: {damage}).", name=name_tr(ennemi.nom), target=name_tr(joueur.nom), damage=degats))
-                time.sleep(0.05)
-
-            elif ennemi.nom == "Dragonnet":
-                degats = max(1, ennemi.attaque - joueur.defense)
-                joueur.subir_degats(degats)
-                brulure = max(brulure, 3)  # applique/rafraîchit 3 tours
-                print(tr("{name} brûle {target} ! Brûlure pendant 3 tours (dégâts subis: {damage}).", name=name_tr(ennemi.nom), target=name_tr(joueur.nom), damage=degats))
-                time.sleep(0.05)
-
-            elif ennemi.nom == "Harpie":
-                if random.random() < 0.2:
-                    stun = True
-                    print(tr("{name} étourdit {target} ! Tu perdras ton prochain tour.", name=name_tr(ennemi.nom), target=name_tr(joueur.nom)))
-                    time.sleep(0.05)
-                else:
-                    ennemi.attaquer(joueur)
-
-            elif ennemi.nom == "Golem de pierre":
-                # Ignore une partie de la DEF
-                degats = max(1, ennemi.attaque - (joueur.defense // 2))
-                joueur.subir_degats(degats)
-                print(tr("{name} frappe brutalement, ignore une partie de la DEF et inflige {damage} dégâts.", name=name_tr(ennemi.nom), damage=degats))
-                time.sleep(0.05)
-
-            elif ennemi.nom == "Bandit":
-                degats = max(1, ennemi.attaque - joueur.defense)
-                if random.random() < 0.2:
-                    degats *= 2
-                    print(tr("{name} réussit une attaque critique !", name=name_tr(ennemi.nom)))
-                    time.sleep(0.05)
-                joueur.subir_degats(degats)
-                print(tr("{name} attaque et inflige {damage} dégâts.", name=name_tr(ennemi.nom), damage=degats))
-                time.sleep(0.05)
-
-            elif ennemi.nom == "Minotaure":
-                # Charge puissante mais se fatigue (-2 ATK pendant 2 tours simulés via message, pas de buff persistant ici)
-                if random.random() < 0.3:
-                    degats = max(1, (ennemi.attaque + 5) - joueur.defense)
-                    joueur.subir_degats(degats)
-                    print(tr("{name} charge avec rage et inflige {damage} dégâts !", name=name_tr(ennemi.nom), damage=degats))
-                    time.sleep(0.05)
-                else:
-                    ennemi.attaquer(joueur)
-
-            elif ennemi.nom == "Slime géant":
-                # Attaque et renvoie un petit splash supplémentaire
-                degats = max(1, ennemi.attaque - joueur.defense)
-                splash = random.randint(0, 2)
-                joueur.subir_degats(degats + splash)
-                print(tr("{name} écrase et éclabousse : {damage}+{splash} dégâts.", name=name_tr(ennemi.nom), damage=degats, splash=splash))
-                time.sleep(0.05)
-
-            elif ennemi.nom == "Sorcier corrompu":
-                # Sort aléatoire: feu (brulure), glace (stun), ombre (dégâts bruts)
-                sort = random.choice(["feu", "glace", "ombre"])
-                if sort == "feu":
-                    degats = max(1, ennemi.attaque - joueur.defense)
-                    joueur.subir_degats(degats)
-                    brulure = max(brulure, 2)
-                    print(tr("{name} lance un sort de feu : {damage} dégâts et brûlure (2 tours).", name=name_tr(ennemi.nom), damage=degats))
-                    time.sleep(0.05)
-                elif sort == "glace":
-                    degats = max(1, ennemi.attaque - joueur.defense - 2)
-                    joueur.subir_degats(degats)
-                    stun = True
-                    print(tr("{name} gèle {target} : {damage} dégâts et étourdissement.", name=name_tr(ennemi.nom), target=name_tr(joueur.nom), damage=degats))
-                    time.sleep(0.05)
-                else:
-                    degats = max(2, ennemi.attaque - (joueur.defense // 3))
-                    joueur.subir_degats(degats)
-                    print(tr("{name} invoque les ombres et inflige {damage} dégâts occultes.", name=name_tr(ennemi.nom), damage=degats))
-                    time.sleep(0.05)
-
-            else:
-                # Gobelin, Squelette, etc. comportement par défaut
-                ennemi.attaquer(joueur)
-
-    # Fin du combat
-    if joueur.est_vivant():
-        print(tr("{name} a vaincu {target} !", name=name_tr(joueur.nom), target=name_tr(ennemi.nom)))
-        time.sleep(0.05)
-        verifier_quete(joueur, ennemi=ennemi)
-        if ennemi.nom in boss_names or ennemi.nom in superboss_names:
-            if ennemi.nom not in joueur.defeated_bosses:
-                joueur.defeated_bosses.append(ennemi.nom)
-        bonus_xp = ennemi.pv_max // 10
-
-        if ennemi.nom in superboss_names:
-            joueur.gagner_xp(500 + bonus_xp)
-            joueur.loot("Or", 100)
-            joueur.loot("Clé Mystique", 0)  # pas de clé pour le superboss
-            print(tr("Victoire. . ."))
-            time.sleep(0.05)
-        elif ennemi.nom in boss_names:
-            joueur.gagner_xp(100 + bonus_xp)
-            joueur.loot("Or", 50)
-            joueur.loot("Clé Mystique", 1)  # 1 clé par boss régulier
-            print(tr("Victoire contre un Boss !"))
-            time.sleep(0.05)
-        elif ennemi.nom in miniboss_names:
-            # Récompenses de miniboss (entre ennemi classique et boss)
-            joueur.gagner_xp(60 + bonus_xp)
-            joueur.loot("Or", 30)
-            # petite chance de drop rare / clé
-            if random.random() < 0.20:
-                rare = random.choice(["Épée magique", "Grimoire ancien", "Anneau de Force"])
-                joueur.loot(rare, 1)
-            if random.random() < 0.12:
-                joueur.loot("Clé Mystique", 1)
-            print(tr("Victoire contre un Mini-boss !"))
-            time.sleep(0.05)
-        else:
-            joueur.gagner_xp(20 + bonus_xp)
-            joueur.loot("Or", 10)
-            print(tr("Victoire contre un ennemi classique."))
-            time.sleep(0.05)
-
-        for item, drop_chance in ennemi.loot_table:
-            if random.random() < drop_chance:
-                joueur.loot(item, 1)
-    else:
-        print(tr("{name} a été vaincu par {target}...", name=name_tr(joueur.nom), target=name_tr(ennemi.nom)))
-        time.sleep(0.05)
-        time.sleep(2)
-        print(tr("Fin de la partie."))
-        time.sleep(0.05)
-        print(tr("Merci d'avoir joué !"))
-        time.sleep(0.05)
-        recommencer()
-        reddit_url = "https://www.reddit.com/r/FreePython/"
-        print(tr("Rejoignez ma communauté sur Reddit : {url}", url=reddit_url))
-        time.sleep(0.05)
-        print(tr("Le jeu se fermera dans 5 secondes..."))
-        time.sleep(0.05)
-        time.sleep(5)
-        sys.exit()
-
-def shop_handler(joueur, title, items):
-    tprint(title)
-    for i, (item, price) in enumerate(items, 1):
-        tprint(f"{i}. {name_tr(item)} - {tr('Prix: {price} or', price=price)}")
-    choix = choose_int(tr("Que veux-tu acheter? (numéro ou 0 pour quitter) : "), 0, len(items))
-    if choix is None or choix == 0:
-        return
-    item, price = items[choix - 1]
-    if not spend(joueur, price):
-        return
-    joueur.loot(item, 1)
-    tprint(tr("Achat effectué!"))
-
-def interagir_avec_pnj(joueur, npc_nom):
-    def drink_beer():
-        if spend(joueur, 2):
-            joueur.pv = min(joueur.pv_max, joueur.pv + 10)
-            tprint("Vous vous sentez revigoré! +10 PV")
-
-    def eat_bread():
-        if spend(joueur, 5):
-            joueur.pv = min(joueur.pv_max, joueur.pv + 10)
-            tprint("Le vin vous revigore complètement! +25 PV")
-
-    def tavern_info():
-        tprint("Le tavernier vous raconte des histoires sur les monstres des environs...")
-        for line in [
-            "- La forêt est infestée de plantes carnivores et de spectres",
-            "- Le château abrite des vampires et des sorciers corrompus",
-            "- Le marais maudit est le domaine du Roi du Marais",
-            "- Et attention au Tyran de Feu dans le volcan!"
-        ]:
-            tprint(line)
-
-    def sleep_inn():
-        joueur.pv = joueur.pv_max
-        tprint("Tu as dormi à l'auberge : PV restaurés et sauvegarde automatique.")
-        sauvegarder_jeu(joueur, f"auto_sleep_{joueur.nom}")
-
-    def improve_attack():
-        if spend(joueur, 20):
-            joueur.attaque += 2
-            tprint("Votre attaque a été améliorée! +2 ATK")
-
-    def improve_defense():
-        if spend(joueur, 15):
-            joueur.defense += 1
-            tprint("Votre défense a été améliorée! +1 DEF")
-
-    def rest_half():
-        if spend(joueur, 10):
-            joueur.pv = min(joueur.pv_max, joueur.pv + joueur.pv_max // 2)
-            tprint("Vous vous reposez. +50% PV")
-
-    def rest_full():
-        if spend(joueur, 20):
-            joueur.pv = joueur.pv_max
-            tprint("Vous dormez complètement. PV restaurés.")
-
-    def quest_advice():
-        if joueur.quete:
-            tprint("Votre quête vous mènera vers {cible}. Soyez prudent.", cible=name_tr(joueur.quete.cible))
-        else:
-            tprint("Vous n'avez pas de quête active.")
-
-    def blessing():
-        if spend(joueur, 30):
-            joueur.pv_max += 5
-            joueur.pv = min(joueur.pv_max, joueur.pv + 5)
-            tprint("Vous recevez une bénédiction! +5 PV max")
-
-    def sell_stolen():
-        objet = tinput("Objet : ").strip()
-        if objet in joueur.inventaire and joueur.inventaire[objet] > 0:
-            joueur.inventaire[objet] -= 1
-            joueur.inventaire["Or"] = joueur.inventaire.get("Or", 0) + 20
-            tprint("Vendu pour {prix} or!", prix=20)
-        else:
-            tprint("Objet non trouvé.")
-
-    def thief_quest():
-        tprint("Quête acceptée : Volez une potion au vendeur. Revenez avec.")
-        joueur.loot("Or", 50)
-        tprint("Quête terminée! +50 or")
-
-    def buy_book():
-        if spend(joueur, 25):
-            joueur.gagner_xp(10)
-            tprint("Vous apprenez de nouvelles choses! +10 XP")
-
-    def story():
-        tprint("Il y a longtemps, le monde était en paix... Mais les dragons ont apporté le chaos.")
-
-    menus = {
-        "Tavernier du village": lambda: service_menu(joueur, "Bienvenue à la taverne! Que puis-je vous servir?", [
-            ("Boire une bière (5 pièces d'or) - Restaure 10 PV", drink_beer),
-            ("Manger un peu de pain (5 pièces d'or) - Restaure 10 PV", eat_bread),
-            ("Demander des informations sur la région", tavern_info),
-            ("Dormir à l'auberge (100% PV, sauvegarde auto)", sleep_inn),
-        ]),
-        "Vendeur de potions": lambda: shop_handler(joueur, "Bienvenue chez l'apothicaire! J'ai les meilleures potions de la région.", [
-            ("Potion", 5),
-            ("Élixir", 15),
-            ("Potion supérieure", 25),
-        ]),
-        "Marchand": lambda: shop_handler(joueur, "Bienvenue chez le marchand! Voici ce que j'ai en stock:", [
-            ("Épée magique", 50),
-            ("Bouclier", 30),
-            ("Anneau de Force", 40),
-            ("Cape d'Invisibilité", 60),
-            ("Amulette de Vie", 45),
-        ]),
-        "Forgeron": lambda: service_menu(joueur, "Bienvenue chez le forgeron! J'améliore vos armes et armures.", [
-            ("Améliorer l'attaque (+2 ATK, 20 or)", improve_attack),
-            ("Améliorer la défense (+1 DEF, 15 or)", improve_defense),
-        ]),
-        "Aubergiste": lambda: service_menu(joueur, "Bienvenue à l'auberge! Reposez-vous ici.", [
-            ("Dormir (restaure 50% PV, 10 or)", rest_half),
-            ("Dormir complètement (100% PV, 20 or)", rest_full),
-        ]),
-        "Mystique": lambda: service_menu(joueur, "Les étoiles me parlent... Que cherchez-vous?", [
-            ("Conseil sur la quête (+ indice)", quest_advice),
-            ("Bénédiction (+5 PV max temporaire, 30 or)", blessing),
-        ]),
-        "Contact de la Guilde des Voleurs": lambda: service_menu(joueur, "Psst... Besoin d'aide discrète?", [
-            ("Vendre un objet volé (double prix)", sell_stolen),
-            ("Quête secondaire : Voler un objet (récompense 50 or)", thief_quest),
-        ]),
-        "Savant": lambda: service_menu(joueur, "Bienvenue dans ma bibliothèque. La connaissance est pouvoir.", [
-            ("Acheter un livre de sagesse (+10 XP, 25 or)", buy_book),
-            ("Histoire du monde", story),
-        ]),
-    }
-
-    handler = menus.get(npc_nom)
-    if handler:
-        handler()
-    else:
-        tprint("Choix invalide.")
-
-def fabriquer_arc(joueur):
-    ficelles_requises = 3
-    if joueur.inventaire.get("Ficelle", 0) < ficelles_requises:
-        tprint("Pas assez de ficelle pour fabriquer un arc (3 requis).")
-        return
-
-    joueur.inventaire["Ficelle"] -= ficelles_requises
-    joueur.loot("Arc", 1)
-    tprint("Arc fabriqué ! Il inflige +5 dégâts.")
-
-def fabriquer_dague(joueur):
-    if (
-        joueur.inventaire.get("Barre d'acier", 0) < 3
-        or joueur.inventaire.get("Lanière de cuir", 0) < 1
-        or joueur.inventaire.get("Marteau", 0) < 1
-    ):
-        tprint("Il faut 3 barres d'acier, 1 lanière de cuir et 1 marteau pour fabriquer une dague.")
-        return
-
-    joueur.inventaire["Barre d'acier"] -= 3
-    joueur.inventaire["Lanière de cuir"] -= 1
-    joueur.loot("Dague", 1)
-    tprint("Dague fabriquée ! Elle inflige +2 dégâts. Le marteau est rendu.")
-
-def fabriquer_epee_longue(joueur):
-    if (
-        joueur.inventaire.get("Barre d'acier", 0) < 10
-        or joueur.inventaire.get("Lanière de cuir", 0) < 2
-        or joueur.inventaire.get("Marteau", 0) < 1
-        or joueur.inventaire.get("Joyau du Dragon", 0) < 1
-    ):
-        tprint("Il faut 10 barres d'acier, 2 lanières de cuir, 1 marteau et 1 joyau du Dragon.")
-        return
-
-    joueur.inventaire["Barre d'acier"] -= 10
-    joueur.inventaire["Lanière de cuir"] -= 2
-    joueur.inventaire["Joyau du Dragon"] -= 1
-    joueur.loot("Épée longue", 1)
-    tprint("Épée longue fabriquée ! Elle inflige +7 dégâts. Le marteau est rendu.")
-
-def menu_fabrication(joueur):
-    service_menu(joueur, "Que veux-tu fabriquer ?", [
-        ("Fabriquer un arc (3 ficelles)", lambda: fabriquer_arc(joueur)),
-        ("Fabriquer une dague (3 barres d'acier, 1 lanière de cuir, 1 marteau)", lambda: fabriquer_dague(joueur)),
-        ("Fabriquer une épée longue (10 barres d'acier, 2 lanières de cuir, 1 marteau, 1 joyau du Dragon)", lambda: fabriquer_epee_longue(joueur)),
-    ])
-
-# --- Menu principal ---
-def menu_principal(joueur):
-    donner_quete(joueur)  # donne une quête au début
-    afficher_carte(joueur)  # affiche la carte au démarrage
-    while joueur.est_vivant():
-        print("\n" + tr("=== MENU PRINCIPAL ==="))
-        time.sleep(0.05)
-        print(tr("Localisation: {loc}", loc=joueur.localisation))
-        time.sleep(0.05)
-        current_into_level = joueur.xp - total_xp_for_level(joueur.niveau)
-        required = total_xp_for_level(joueur.niveau + 1) - total_xp_for_level(joueur.niveau)
-        print(tr("Niveau: {lvl} | PV: {pv}/{pvmax} | ATK: {atk} | DEF: {defn} | XP: {cur}/{req}", lvl=joueur.niveau, pv=joueur.pv, pvmax=joueur.pv_max, atk=joueur.attaque, defn=joueur.defense, cur=current_into_level, req=required))
-        time.sleep(0.05)
-        print()
-        time.sleep(0.05)
-        for opt in [
-            "1. Combattre un ennemi",
-            "2. Affronter un boss (si disponible)",
-            "3. Affronter le SUPERBOSS",
-            "4. Voir inventaire",
-            "5. Voir quête active",
-            "6. Voir la carte",
-            "7. Voyager vers une autre région",
-            "8. Sauvegarder la progression",
-            "9. Quitter",
-            "10. Interagir avec les habitants (en devloppement)",
-            "11. Fabriquer un objet",
-        ]:
-            tprint(opt)
-
-        choix = tinput("Tape un chiffre (1-11) : ").strip()
-
-        choix_normalise = "".join(choix.casefold().split())
-        if choix_normalise in {"anumber(1-10)", "anumber(1-10))"}:
-            print("Haha very funny")
-            continue
-
-        if choix == "1":
-            # Combat location-based (spawn aléatoire depuis la liste de la localisation)
-            ennemi = spawn_enemy_for_location(joueur)
-            if ennemi:
-                combat(joueur, ennemi)
-            else:
-                print(tr("Aucun ennemi disponible ici!"))
-                time.sleep(0.05)
-        elif choix == "2":
-            # Boss fight location-based
-            lieu = locations.get(joueur.localisation, {})
-            boss_options = lieu.get("boss")
-            if boss_options:
-                if isinstance(boss_options[0], str):
-                    boss_options = (boss_options,)
-                available_bosses = [boss for boss in boss_options if boss[0] not in joueur.defeated_bosses]
-                if available_bosses:
-                    nom, pv, atk, defn = random.choice(available_bosses)
-                    boss = Personnage(nom, pv, atk, defn)
-                    combat(joueur, boss)
-                else:
-                    print(tr("Aucun boss disponible ici!"))
-                    time.sleep(0.05)
-            else:
-                print(tr("Aucun boss disponible ici!"))
-                time.sleep(0.05)
-        elif choix == "3":
-            available_superbosses = [boss for boss in superboss_possibles if boss[0] not in joueur.defeated_bosses]
-            if available_superbosses:
-                nom, pv, atk, defn = random.choice(available_superbosses)
-                superboss = Personnage(nom, pv, atk, defn)
-                combat(joueur, superboss)
-            else:
-                print(tr("Aucun boss disponible ici!"))
-                time.sleep(0.05)
-        elif choix == "4":
-            print(tr("Inventaire :"), joueur.inventaire)
-            time.sleep(0.05)
-        elif choix == "5":
-            if joueur.quete:
-                q = joueur.quete
-                etat = "terminée" if q.terminee else f"{q.progression}/{q.quantite}"
-                print(tr("Quête : {name} | Objectif : {target} ({state})", name=name_tr(q.nom), target=name_tr(q.cible), state=etat))
-                time.sleep(0.05)
-            else:
-                print(tr("Aucune quête active."))
-                time.sleep(0.05)
-        elif choix == "6":
-            afficher_carte(joueur)
-        elif choix == "7":
-            afficher_carte(joueur)
-            lieu = locations.get(joueur.localisation, {})
-            if lieu.get("connections"):
-                destinations = list(lieu["connections"].keys())
-                for i, dest in enumerate(destinations, 1):
-                    print(f"{i}. {name_tr(dest)}")
-                    time.sleep(0.05)
-                try:
-                    choix_voyage = int(tinput(tr("Choisir une destination (numéro) : ")))
-                    if 1 <= choix_voyage <= len(destinations):
-                        voyager(joueur, destinations[choix_voyage - 1])
-                    else:
-                        print(tr("Choix invalide!"))
-                        time.sleep(0.05)
-                except (ValueError, IndexError):
-                    print(tr("Entrée invalide!"))
-                    time.sleep(0.05)
-            else:
-                print(tr("Aucune destination accessible!"))
-                time.sleep(0.05)
-        elif choix == "8":
-            nom_save = tinput("Nom de la sauvegarde (défaut: 'save') : ").strip()
-            if not nom_save:
-                nom_save = "save"
-            sauvegarder_jeu(joueur, nom_save)
-        elif choix == "9":
-            print(tr("Fin de la partie."))
-            time.sleep(0.05)
-            print(tr("le jeu se fermera dans 5 secondes..."))
-            time.sleep(4)
-            sys.exit()
-        elif choix == "10":
-            lieu = locations.get(joueur.localisation, {})
-            if lieu.get("npcs"):
-                npcs = lieu["npcs"]
-                for i, npc in enumerate(npcs, 1):
-                    print(f"{i}. {name_tr(npc)}")
-                    time.sleep(0.05)
-                try:
-                    choix_npc = int(tinput(tr("Choisir un habitant (numéro) : ")))
-                    if 1 <= choix_npc <= len(npcs):
-                        interagir_avec_pnj(joueur, npcs[choix_npc - 1])
-                    else:
-                        print(tr("Choix invalide!"))
-                        time.sleep(0.05)
-                except (ValueError, IndexError):
-                    print(tr("Entrée invalide!"))
-                    time.sleep(0.05)
-            else:
-                print(tr("Aucun PNJ disponible ici!"))
-                time.sleep(0.05)
-        elif choix == "11":
-            menu_fabrication(joueur)
-        else:
-            print(tr("Choix invalide."))
-            time.sleep(0.05)
-
-# --- Lancement du jeu ---
-def launcher():
-    """Écran de démarrage - Choisir nouveau jeu ou charger"""
-    # Choix de la langue au lancement
-    global LANG
-    try:
-        lang_choice = input(tr("Choisir la langue / Choose language (fr/en) [fr]: ")).strip().lower()
-        if lang_choice.startswith('en'):
-            LANG = 'en'
-    except Exception:
-        pass
-
-    tprints(
-        "\n" + "="*50,
-        tr("BIENVENUE DANS RPG.txt"),
-        "="*50,
-    )
-
-    sauvegardes = lister_sauvegardes()
-
-    if sauvegardes:
-        print(tr("1. Nouveau jeu"))
-        print(tr("2. Charger une sauvegarde"))
-        choix = tinput(tr("Choisir (1 ou 2) : ")).strip()
-
-        if choix == "2":
-            print(tr("\nSauvegardes disponibles:"))
-            for i, save in enumerate(sauvegardes, 1):
-                print(f"  {i}. {save}")
-            try:
-                choix_save = int(tinput(tr("Quelle sauvegarde charger? (numéro) : ")))
-                if 1 <= choix_save <= len(sauvegardes):
-                    joueur = charger_jeu(sauvegardes[choix_save - 1])
-                    if joueur:
-                        menu_principal(joueur)
-                    return
-                tprint(tr("Choix invalide!"))
-            except ValueError:
-                tprint(tr("Entrée invalide!"))
-    
-    joueur = Personnage("Héros", 100, 15, 5, pv_max=100)
-    joueur.loot("Or", 10)  # or de départ
-    joueur.loot("Bâton", 1)
-    menu_principal(joueur)
-
-if __name__ == "__main__":
-    launcher()
-#1521
