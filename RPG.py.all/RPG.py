@@ -1,3 +1,4 @@
+
 # Licensed under CC BY-ND 4.0
 # You may use and share this code, but you may not modify it.
 
@@ -318,7 +319,7 @@ NAME_TRANSLATIONS_EN = {
     "Dague": "Dagger",
     "Ficelle": "String",
     "Flèche": "Arrow",
-    "Bout d'acier": "Steel Tip",
+    "Bout d'acier": "Steel Bit",
     "Arc": "Bow",
     "Barre d'acier": "Steel Rod",
     "Lanière de cuir": "Leather Strap",
