@@ -68,6 +68,24 @@ TRANSLATIONS_EN = {
     "9. Quitter": "9. Quit",
     "Tape un chiffre (1-11) : ": "Type a number (1-11): ",
     "11. Fabriquer un objet": "11. Craft an item",
+    "12. Voir les succès": "12. View achievements",
+    "=== SUCCÈS ===": "=== ACHIEVEMENTS ===",
+    "Succès débloqué : {name} !": "Achievement unlocked: {name}!",
+    "Succès : {unlocked}/{total}": "Achievements: {unlocked}/{total}",
+    "[Débloqué] {name} - {description}": "[Unlocked] {name} - {description}",
+    "[Verrouillé] {name} - {description}": "[Locked] {name} - {description}",
+    "Première victoire": "First Victory",
+    "Gagne ton premier combat.": "Win your first battle.",
+    "Chasseur de boss": "Boss Hunter",
+    "Vaincs un boss.": "Defeat a boss.",
+    "Tueur de dragon": "Dragon Slayer",
+    "Vaincs le Dragon enflammé.": "Defeat the Flaming Dragon.",
+    "Niveau 5": "Level 5",
+    "Atteins le niveau 5.": "Reach level 5.",
+    "Artisan": "Craftsperson",
+    "Fabrique ton premier objet.": "Craft your first item.",
+    "Archer": "Archer",
+    "Tire une flèche avec un arc.": "Shoot an arrow with a Bow.",
     "Que veux-tu fabriquer ?": "What would you like to craft?",
     "Fabriquer un arc (3 ficelles)": "Craft a bow (3 String)",
     "Fabriquer une dague (3 barres d'acier, 1 lanière de cuir, 1 marteau)": "Craft a dagger (3 Steel Rods, 1 Leather Strap, 1 Hammer)",
@@ -553,6 +571,7 @@ def sauvegarder_jeu(joueur, nom_sauvegarde="save"):
         "niveau": joueur.niveau,
         "localisation": joueur.localisation,
         "defeated_bosses": joueur.defeated_bosses,
+        "achievements": joueur.achievements,
         "quete": {
             "nom": joueur.quete.nom if joueur.quete else None,
             "progression": joueur.quete.progression if joueur.quete else 0,
@@ -583,6 +602,7 @@ def charger_jeu(nom_sauvegarde="save"):
     joueur.niveau = donnees["niveau"]
     joueur.localisation = donnees["localisation"]
     joueur.defeated_bosses = donnees.get("defeated_bosses", [])
+    joueur.achievements = donnees.get("achievements", [])
     
     # Recréer la quête si elle existe
     if donnees["quete"]["nom"]:
@@ -727,8 +747,26 @@ def total_xp_for_level(level):
     """
     return int(40 * (level - 1)**2.2)
 
+ACHIEVEMENTS = {
+    "first_victory": ("Première victoire", "Gagne ton premier combat."),
+    "boss_hunter": ("Chasseur de boss", "Vaincs un boss."),
+    "dragon_slayer": ("Tueur de dragon", "Vaincs le Dragon enflammé."),
+    "level_5": ("Niveau 5", "Atteins le niveau 5."),
+    "craft_first_item": ("Artisan", "Fabrique ton premier objet."),
+    "first_bow_shot": ("Archer", "Tire une flèche avec un arc."),
+}
+
+def unlock_achievement(joueur, achievement_id):
+    if achievement_id not in ACHIEVEMENTS or achievement_id in joueur.achievements:
+        return False
+
+    joueur.achievements.append(achievement_id)
+    name, _description = ACHIEVEMENTS[achievement_id]
+    tprint(tr("Succès débloqué : {name} !", name=tr(name)))
+    return True
+
 class Personnage:
-    __slots__ = ('nom', 'pv_max', 'pv', 'attaque', 'defense', 'inventaire', 'xp', 'niveau', 'quete', 'localisation', 'last_spawned_enemy', 'loot_table', 'defeated_bosses')
+    __slots__ = ('nom', 'pv_max', 'pv', 'attaque', 'defense', 'inventaire', 'xp', 'niveau', 'quete', 'localisation', 'last_spawned_enemy', 'loot_table', 'defeated_bosses', 'achievements')
     def __init__(self, nom, pv, attaque, defense, pv_max=None):
         self.nom = nom
         self.pv_max = pv if pv_max is None else pv_max
@@ -743,6 +781,7 @@ class Personnage:
         # évite de faire apparaître le même ennemi deux fois de suite
         self.last_spawned_enemy = None
         self.defeated_bosses = []
+        self.achievements = []
         base_name = nom.partition(" (Élite)")[0]
         self.loot_table = ENEMY_LOOT_TABLES.get(base_name, ())
 
@@ -769,6 +808,7 @@ class Personnage:
                 tprint(tr("Il ne te reste plus de flèches pour tirer avec l'arc."))
                 return
             self.inventaire["Flèche"] -= 1
+            unlock_achievement(self, "first_bow_shot")
 
         degats = max(1, self.attaque + bonus_arme - cible.defense)  # minimum 1 dégât
         cible.subir_degats(degats)
@@ -799,6 +839,9 @@ class Personnage:
             print(tr("{name} monte au niveau {level} ! ATK+2, DEF+1, PVmax+10.", name=name_tr(self.nom), level=self.niveau))
             time.sleep(0.05)
             leveled = True
+
+        if self.niveau >= 5:
+            unlock_achievement(self, "level_5")
 
         if not leveled:
             current_into_level = self.xp - total_xp_for_level(self.niveau)
@@ -1148,6 +1191,11 @@ def combat(joueur, ennemi):
         print(tr("{name} a vaincu {target} !", name=name_tr(joueur.nom), target=name_tr(ennemi.nom)))
         time.sleep(0.05)
         verifier_quete(joueur, ennemi=ennemi)
+        unlock_achievement(joueur, "first_victory")
+        if ennemi.nom in boss_names or ennemi.nom in superboss_names:
+            unlock_achievement(joueur, "boss_hunter")
+        if ennemi.nom == "Dragon enflammé":
+            unlock_achievement(joueur, "dragon_slayer")
         if ennemi.nom in boss_names or ennemi.nom in superboss_names:
             if ennemi.nom not in joueur.defeated_bosses:
                 joueur.defeated_bosses.append(ennemi.nom)
@@ -1213,7 +1261,7 @@ def shop_handler(joueur, title, items):
     item, price = items[choix - 1]
     if not spend(joueur, price):
         return
-    joueur.loot(item, item_data.get("craftQuantity", 1))
+    joueur.loot(item, 1)
     tprint(tr("Achat effectué!"))
 
 def interagir_avec_pnj(joueur, npc_nom):
@@ -1362,6 +1410,7 @@ def fabriquer_objet(joueur, item):
             joueur.inventaire[material] -= quantity
 
     joueur.loot(item, item_data.get("craftQuantity", 1))
+    unlock_achievement(joueur, "craft_first_item")
     tprint(tr("{item} fabriqué ! Bonus de dégâts : +{damage}.", item=name_tr(item), damage=item_data["damageBonus"]))
     return True
 
@@ -1387,6 +1436,15 @@ def menu_fabrication(joueur):
         label = tr("Fabriquer {item} ({ingredients})", item=name_tr(item), ingredients=ingredients)
         options.append((label, lambda item=item: fabriquer_objet(joueur, item)))
     service_menu(joueur, "Que veux-tu fabriquer ?", options)
+
+def afficher_succes(joueur):
+    tprint("=== SUCCÈS ===")
+    for achievement_id, (name, description) in ACHIEVEMENTS.items():
+        if achievement_id in joueur.achievements:
+            tprint("[Débloqué] {name} - {description}", name=tr(name), description=tr(description))
+        else:
+            tprint("[Verrouillé] {name} - {description}", name=tr(name), description=tr(description))
+    tprint("Succès : {unlocked}/{total}", unlocked=len(joueur.achievements), total=len(ACHIEVEMENTS))
 
 # --- Menu principal ---
 def menu_principal(joueur):
@@ -1415,10 +1473,11 @@ def menu_principal(joueur):
             "9. Quitter",
             "10. Interagir avec les habitants (en devloppement)",
             "11. Fabriquer un objet",
+            "12. Voir les succès",
         ]:
             tprint(opt)
 
-        choix = tinput("Tape un chiffre (1-11) : ").strip()
+        choix = tinput("Tape un chiffre (1-12) : ").strip()
 
         choix_normalise = "".join(choix.casefold().split())
         if choix_normalise in {"anumber(1-10)", "anumber(1-10))"}:
@@ -1528,6 +1587,8 @@ def menu_principal(joueur):
                 time.sleep(0.05)
         elif choix == "11":
             menu_fabrication(joueur)
+        elif choix == "12":
+            afficher_succes(joueur)
         else:
             print(tr("Choix invalide."))
             time.sleep(0.05)
@@ -1579,4 +1640,4 @@ def launcher():
 
 if __name__ == "__main__":
     launcher()
-#1582
+#1643
